@@ -26,17 +26,26 @@ const productsRepository={
         return product
     },
     createProduct:async(body)=>{
-        const product=await Product.create({
+        let product=await Product.create({
             name:body.name,
             description:body.description,
             quantity:body.quantity,
             status:body.status,
             seller_user_id:body.seller_user_id,
         });
+        product=await Product.findByPk(product.id,{
+            include:[
+                {association:'Seller'},
+                {association:'Sales'},
+                {association:'Transactions'},
+                {association:'Category'},
+                ,
+            ],
+        });
         return product
     },
     updateProduct:async(body,id)=>{
-        await Product.update({
+        let product=await Product.update({
             name:body.name,
             description:body.description,
             quantity:body.quantity,
@@ -47,7 +56,15 @@ const productsRepository={
                 id
             }
         });
-        const product=await Product.findByPk(id);
+        product=await Product.findByPk(product.id,{
+            include:[
+                {association:'Seller'},
+                {association:'Sales'},
+                {association:'Transactions'},
+                {association:'Category'},
+                ,
+            ],
+        });
         return product
     },
     destroyProduct:async(id)=>{

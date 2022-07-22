@@ -27,7 +27,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Transaction.init({
-    buyer_user_id: DataTypes.INTEGER,
+    buyer_user_id: {
+      type:DataTypes.INTEGER,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
     deletedAt:DataTypes.DATE
   }, {
     sequelize,

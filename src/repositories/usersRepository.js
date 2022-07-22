@@ -31,24 +31,30 @@ const usersRepository={
         });
         return user
     },
-    findUserByType:async(type)=>{
+    findUsersByType:async(type)=>{
         //falta desarrollar este apartado, debería incluirse únicamente a aquellos usuarios que hayan efectuados transacciones
         if (type=buyer) {
            const users=await User.findAll({
                 include:[{association:'Buys'}],
             })
-            return users
+            return users;
         }
     },
     createUser:async(body)=>{
-        const user=await User.create({
+        let user=await User.create({
             last_name:body.first_name,
             first_name:body.first_name,
             email:body.email,
             password:body.password,
             is_admin:body.is_admin,
         });
-        return user
+        user=await User.findByPk(user.id,{
+            include:[
+                {association:'Buys'},
+                {association:'ProductsOnSale'},
+            ],
+        });
+        return user;
     },
     updateUser:async(body,id)=>{
         await User.update({
@@ -62,7 +68,12 @@ const usersRepository={
                 id
             }
         });
-        const user=await User.findByPk(id);
+        const user=await User.findByPk(id,{
+            include:[
+                {association:'Buys'},
+                {association:'ProductsOnSale'},
+            ],
+        });
         return user
     },
     destroyUser:async(id)=>{

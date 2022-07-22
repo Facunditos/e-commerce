@@ -21,7 +21,7 @@ module.exports = {
         type: Sequelize.STRING(150)
       },
       is_admin: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
       },
       deletedAt: {
         type: Sequelize.DATE

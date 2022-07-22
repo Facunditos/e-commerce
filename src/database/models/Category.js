@@ -17,8 +17,19 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Category.init({
-    name: DataTypes.STRING(150),
-    description: DataTypes.TEXT,
+    name: {
+      type:DataTypes.STRING(150),
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    description: {
+      type:DataTypes.TEXT,
+      defaultValue:"categoría sin descripción",
+      allowNull: false,
+    },
     deletedAt: DataTypes.DATE
   }, {
     sequelize,

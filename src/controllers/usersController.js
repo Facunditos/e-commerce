@@ -1,12 +1,46 @@
 require("dotenv").config()
 const {
-    getAll,
-    findByPk,
-    findByEmail,
-    findByType,
-    create,
-    update,
-    destroy,
+    getAllCategories,
+    findCategoryByPk,
+    createCategory,
+    updateCategory,
+    destroyCategory
+}=require("../repositories/categoriesRepository");
+
+const {
+    getAllProducts,
+    findProductByPk,
+    createProduct,
+    updateProduct,
+    destroyProduct
+}=require("../repositories/productsRepository");
+
+const {
+    getAllTransactionsDetails,
+    findTransactionDetailByPk,
+    findTransactionDetailsByTransaction,
+    createTransactionDetail,
+    updateTransactionDetail,
+    destroyTransactionDetail
+}=require("../repositories/transactionDetailsRepository");
+
+const {
+    getAllTransactions,
+    getAllTransactionsByBuyer,
+    findTransactionByPk,
+    createTransaction,
+    updateTransaction,
+    destroyTransaction
+}=require("../repositories/transactionsRepository");
+
+const {
+    getAllUsers,
+    findUserByPk,
+    findUserByEmail,
+    findUsersByType,
+    createUser,
+    updateUser,
+    destroyUser
 }=require("../repositories/usersRepository");
 
 const bcryptjs=require("bcryptjs");
@@ -15,7 +49,7 @@ const jwt=require("jsonwebtoken");
 const usersController={
     getUsersList:async(req,res)=>{
         try{
-            let users = await getAll();
+            let users = await getAllUsers();
             if (users.length!=0) {
                 return res.status(200).json({
                     status:200,
@@ -39,7 +73,7 @@ const usersController={
     getUserDetail:async (req,res)=>{
         let {id}=req.params;
         try {
-            let user=await findByPk(id);
+            let user=await findUserByPk(id);
             if (!user) return res.status(404).json({
                 status:404,
                 message:'There is no user whit this id'
@@ -61,7 +95,7 @@ const usersController={
     searchUserByType:async(req,res)=>{
         try {
             const {type}=req.query;
-            const users=await findByType(email);
+            const users=await findUsersByType(email);
             if (users!=0) {
                 return res.status(200).json({
                     status:200,
@@ -86,9 +120,9 @@ const usersController={
         try {
             let {body}=req;
             body.password=bcryptjs.hashSync(body.password,10);
-            const adminUsers=["enviame@gmail.com","facundolopezcrespo@hotmail.com"]
+            const adminUsers=["e_commerce@gmail.com","facundolopezcrespo@hotmail.com"]
             if (adminUsers.includes(body.email)) body.is_admin=true;
-            let user=await create(body);
+            let user=await createUser(body);
             res.status(201).json({
                 status:201,
                 message:'User created',
@@ -107,7 +141,7 @@ const usersController={
     loginUser:async(req,res)=>{
         try {
             let {email,password}=req.body;
-            let user=await findByEmail(email);
+            let user=await findUserByEmail(email);
             if (!user) {
                 return res.status(400).json({
                     status:400,
@@ -124,7 +158,6 @@ const usersController={
             };
             
             const payload=user;
-            console.log(payload);
             const token=jwt.sign(
                 {payload},
                 process.env.SECRETORPRIVATEKEY,
@@ -150,13 +183,13 @@ const usersController={
         let {id}=req.params;
         let {body}=req;
         try {
-            let user=await findByPk(id);
+            let user=await findUserByPk(id);
             if (!user) return res.status(404).json({
                 status:404,
                 message:'There is no user whit this id'
             });
             body.password=bcryptjs.hashSync(body.password,10);
-            const userUpdated=await update(body,id)
+            const userUpdated=await updateUser(body,id)
             return res.status(200).json({
             status:200,
             message:'User updated',
@@ -175,7 +208,7 @@ const usersController={
     deleteUser:async(req,res)=>{
         let {id}=req.params;
         try {
-            let user=await findByPk(id);
+            let user=await findUserByPk(id);
             if (!user) return res.status(404).json({
                 status:404,
                 message:'There is no user whit this id'
@@ -183,7 +216,7 @@ const usersController={
             const userTransactions=await user.getBuys();
             const userProducts=await user.getProductsOnSale();
             if (userTransactions.length==0 && userProducts.length==0) {
-                await destroy(id)
+                await destroyUser(id)
                 return res.status(200).json({
                 status:200,
                 message:'User deleted'

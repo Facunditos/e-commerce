@@ -10,7 +10,16 @@ const transactions_productsRepository={
         });
         return transactionsDetails
     },
-    findDetailsByTransaction:async(transaction_id)=>{
+    findTransactionDetailByPk:async (id)=>{
+        const transactionDetail= await Transaction_Detail.findByPk(id,{
+            include:[
+                {association:'Transaction',},
+                {association:'Product',},
+            ],
+        })
+        return transactionDetail
+    },
+    findTransactionDetailsByTransaction:async(transaction_id)=>{
         const transactionDetails=await Transaction_Detail.findAll({
             where:{
                 transaction_id
@@ -22,16 +31,22 @@ const transactions_productsRepository={
         });
         return transactionDetails
     },
-    createTransactionDetails :async(body)=>{
-        const transactionDetails=await Transaction_Detail.create({
+    createTransactionDetail :async(body)=>{
+        await Transaction_Detail.create({
             transaction_id:body.transaction_id,
             product_id:body.product_id,
             quantity:product.quantity
         });
-        return transactionDetails
+        const transactionDetail=await Transaction_Detail.findByPk(transactionDetail.id,{
+            include:[
+                {association:'Transaction',},
+                {association:'Product',},
+            ],
+        });
+        return transactionDetail
     },
-    updateTransactionDetails :async(id,body)=>{
-        const transactionDetails=await Transaction_Detail.update({
+    updateTransactionDetail :async(id,body)=>{
+        let transactionDetail=await Transaction_Detail.update({
             where:{
                 id
             }
@@ -40,9 +55,15 @@ const transactions_productsRepository={
             product_id:body.product_id,
             quantity:product.quantity
         });
-        return transactionDetails
+        transactionDetail=await Transaction_Detail.findByPk(transactionDetail.id,{
+            include:[
+                {association:'Transaction',},
+                {association:'Product',},
+            ],
+        });
+        return transactionDetail
     },
-    destroyTransactionDetails:async(id)=>{
+    destroyTransactionDetail:async(id)=>{
         return await Transaction_Detail.destroy({
             where:{
                 id

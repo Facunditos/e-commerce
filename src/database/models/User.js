@@ -21,10 +21,38 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   User.init({
-    first_name: DataTypes.STRING(150),
-    last_name: DataTypes.STRING(150),
-    email: DataTypes.STRING(150),
-    password: DataTypes.STRING(150),
+    first_name: {
+      type:DataTypes.STRING(150),
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    last_name: {
+      type:DataTypes.STRING(150),
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    email: {
+      type:DataTypes.STRING(150),
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    password: {
+      type:DataTypes.STRING(150),
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
     is_admin:{     
       type:DataTypes.BOOLEAN,
       defaultValue:false

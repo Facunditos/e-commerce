@@ -31,12 +31,54 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Product.init({
-    name: DataTypes.STRING(150),
-    description: DataTypes.TEXT,
-    quantity: DataTypes.INTEGER,
-    status: DataTypes.STRING(20),
-    seller_user_id: DataTypes.INTEGER,
-    category_id: DataTypes.INTEGER,
+    name: {
+      type:DataTypes.STRING(150),
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    description: {
+      type:DataTypes.TEXT,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    quantity: {
+      type:DataTypes.INTEGER,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    status: {
+      type:DataTypes.STRING(20),
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    seller_user_id: {
+      type:DataTypes.INTEGER,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    category_id: {
+      type:DataTypes.INTEGER,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
     deletedAt:DataTypes.DATE
   }, {
     sequelize,

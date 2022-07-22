@@ -12,7 +12,7 @@ const transactionsRepository={
         });
         return transactions
     },
-    getAllTransactionByBuyer:async(buyer_user_id)=>{
+    getAllTransactionsByBuyer:async(buyer_user_id)=>{
         const transactions=await Transaction.findAll({
             where:{
                 buyer_user_id
@@ -36,18 +36,32 @@ const transactionsRepository={
         return transaction
     },
     createTransaction:async(body)=>{
-        const transaction=await Transaction.create({
+        let transaction=await Transaction.create({
             buyer_user_id:body.buyer_user_id,
+        });
+        transaction=await Transaction.findByPk(id,{
+            include:[
+                {association:'Buyer'},
+                {association:'Details'},
+                {association:'Products'},
+            ],
         });
         return transaction
     },
     updateTransaction:async(id,body)=>{
-        const transaction=await Transaction.create({
+        await Transaction.create({
             where:{
                 id
             }
         },{
             buyer_user_id:body.buyer_user_id,
+        });
+        const transaction=await Transaction.findByPk(transaction.id,{
+            include:[
+                {association:'Buyer'},
+                {association:'Details'},
+                {association:'Products'},
+            ],
         });
         return transaction
     },

@@ -1,25 +1,47 @@
 require("dotenv").config()
 const {
-    getAll,
-    getAllByBuyer,
-    findByPk,
-    create,
-    destroy,
+    getAllCategories,
+    findCategoryByPk,
+    createCategory,
+    updateCategory,
+    destroyCategory
+}=require("../repositories/categoriesRepository");
+
+const {
+    getAllProducts,
+    findProductByPk,
+    createProduct,
+    updateProduct,
+    destroyProduct
+}=require("../repositories/productsRepository");
+
+const {
+    getAllTransactionsDetails,
+    findTransactionDetailByPk,
+    findTransactionDetailsByTransaction,
+    createTransactionDetail,
+    updateTransactionDetail,
+    destroyTransactionDetail
+}=require("../repositories/transactionDetailsRepository");
+
+const {
+    getAllTransactions,
+    getAllTransactionsByBuyer,
+    findTransactionByPk,
+    createTransaction,
+    updateTransaction,
+    destroyTransaction
 }=require("../repositories/transactionsRepository");
 
 const {
     getAllUsers,
     findUserByPk,
     findUserByEmail,
-    findUserByType
+    findUsersByType,
+    createUser,
+    updateUser,
+    destroyUser
 }=require("../repositories/usersRepository");
-
-const {
-    getAllPurchase,
-    findPurchaseByTransaction,
-    createPurchase,
-    destroypurchasedProducts,
-}=require("../repositories/transactions_productsRepository");
 
 const transactionsController={
     getTransactionsList:async(req,res)=>{
@@ -29,7 +51,7 @@ const transactionsController={
 
             if (user.is_admin) {
 
-                transactions= await getAll()
+                transactions= await getAllTransactions()
                 ;
             } else {
                
@@ -57,8 +79,7 @@ const transactionsController={
     getTransactionDetail:async (req,res)=>{
         let {id}=req.params;
         try {
-            let transaction=await findByPk(id);
-            console.log(transaction.Products);
+            let transaction=await findTransactionByPk(id);
             let sellers_id=[];
             transaction.Products.map(e=>
                 sellers_id.push(e.seller_user_id)
@@ -75,7 +96,8 @@ const transactionsController={
             });
             return res.status(200).json({
             status:200,
-            transaction
+            transaction,
+            sellers
             });  
         
         } catch(error) {
@@ -98,11 +120,11 @@ const transactionsController={
             let product_quantityList=[first_product_quantity,second_product_quantity];
             let product_quantityCleanList=product_quantityList.filter(quantity=>quantity>0);
 
-            let transaction=await create(id);
+            let transaction=await createTransaction(id);
             for (let i=0;i<product_idCleanList.length;i++) {
-                await createPurchase(transaction.id,product_idCleanList[i],product_quantityCleanList[i]);
+                await createTransactionDetail(transaction.id,product_idCleanList[i],product_quantityCleanList[i]);
             };
-            transaction=await findByPk(transaction.id);
+            transaction=await findTransactionByPk(transaction.id);
             res.status(201).json({
                 status:201,
                 message:'Transaction created',
@@ -122,13 +144,13 @@ const transactionsController={
         let {id}=req.params;
         let {body}=req;
         try {
-            let transaction=await findByPk(id);
+            let transaction=await findTransactionByPk(id);
             if (!transaction) return res.status(404).json({
                 status:404,
                 message:'There is no transaction whit this id'
             });
             body.password=bcryptjs.hashSync(body.password,10);
-            const transactionUpdated=await update(body,id)
+            const transactionUpdated=await updateTransaction(body,id)
             return res.status(200).json({
             status:200,
             message:'Transaction updated',
@@ -147,7 +169,7 @@ const transactionsController={
     deleteTransaction:async(req,res)=>{
         let {id}=req.params;
         try {
-            let transaction=await findByPk(id);
+            let transaction=await findTransactionByPk(id);
             if (!transaction) return res.status(404).json({
                 status:404,
                 message:'There is no transaction whit this id'
@@ -155,7 +177,7 @@ const transactionsController={
             const transactionTransactions=await transaction.getBuys();
             const transactionProducts=await transaction.getProductsOnSale();
             if (transactionTransactions.length==0 && transactionProducts.length==0) {
-                await destroy(id)
+                await destroyTransaction(id)
                 return res.status(200).json({
                 status:200,
                 message:'Transaction deleted'

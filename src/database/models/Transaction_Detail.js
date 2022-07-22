@@ -22,9 +22,30 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Transaction_Detail.init({
-    transaction_id: DataTypes.INTEGER,
-    product_id: DataTypes.INTEGER,
-    quantity: DataTypes.INTEGER
+    transaction_id: {
+      type:DataTypes.INTEGER,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    product_id: {
+      type:DataTypes.INTEGER,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    },
+    quantity: {
+      type:DataTypes.INTEGER,
+      validate: {
+        notEmpty: true,
+        notNull: true,
+      },
+      allowNull: false,
+    }
   }, {
     sequelize,
     modelName: 'Transaction_Detail',
