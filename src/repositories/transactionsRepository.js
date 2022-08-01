@@ -39,7 +39,7 @@ const transactionsRepository={
         let transaction=await Transaction.create({
             buyer_user_id:body.buyer_user_id,
         });
-        transaction=await Transaction.findByPk(id,{
+        transaction=await Transaction.findByPk(transaction.id,{
             include:[
                 {association:'Buyer'},
                 {association:'Details'},
@@ -72,6 +72,14 @@ const transactionsRepository={
             }
         });
     },
+    transactionAddProduct:async(transaction,item)=>{
+        return await transaction.addProduct(item.id,{
+            through:{
+                price:item.price,
+                quantity:item.quantity
+            }
+        });
+    }
 }
 
 module.exports=transactionsRepository

@@ -5,15 +5,17 @@ const verifyIsAdmin=require("../middlewares/verifyIsAdmin");
 const {validateTransaction}=require("../middlewares/transactionsValidator");
 
 const {
-    getTransactionsList,
-    getTransactionDetail,
-    deleteTransaction
-}=require('../controllers/transactionsController');
+    getCart,
+    buyCart,
+    addToCart,
+    removeToCart
+}=require('../controllers/cartController');
 
 
 
-router.get('/',verifyToken,getTransactionsList);
-router.get('/:id',verifyToken,getTransactionDetail);
-router.delete("/:id",verifyToken,deleteTransaction);
+router.get('/',verifyToken,getCart);
+router.post('/buy',verifyToken,buyCart);
+router.post('/:id',verifyToken,addToCart);
+router.delete("/:id",verifyToken,removeToCart);
 
 module.exports=router

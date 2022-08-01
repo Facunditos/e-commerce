@@ -19,8 +19,6 @@ const {
 router.get('/',verifyToken,verifyIsAdmin,getUsersList);
 router.get('/:id',verifyToken,verifyIsAdmin,getUserDetail);
 router.get('/search',verifyToken,verifyIsAdmin,searchUserByType);
-router.post('/',validateRegister,registerUser);
-router.post('/login',validateLogin,loginUser);
 router.put('/:id',verifyToken,validateUpdate,updateUser);
 router.delete("/:id",verifyToken,deleteUser);
 

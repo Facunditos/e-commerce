@@ -1,24 +1,35 @@
 require("dotenv").config();
+const path=require("path");
 const express=require('express');
 const app=express();
+const session = require("express-session");
+const logger = require("morgan");
 
-var logger = require("morgan");
-
+const mainRouter=require("./routes/main");
+const authRouter=require("./routes/auth");
 const usersRouter=require("./routes/users");
+const cartRouter=require("./routes/cart");
 const transactionsRouter=require("./routes/transactions");
 
+const cartMiddleware=require("../src/middlewares/cartMiddleware")
 
+app.set ("view engine", "ejs");
+app.set('views', path.join(__dirname, '/views'));
+
+app.use(session({
+    secret:process.env.SECRET,
+    saveUninitialized:true,
+    resave:true
+}));
+app.use(cartMiddleware);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-
 app.use(logger("dev"));
-app.use("/",express.Router().get("/",(req,res)=>
-    {
-    res.send('hola mundo divino, que tal te estás sintiendo en tu nueva casa, la verdad es que quiero que tu estadía la disfrutes como realmente te lo merecés. Te cosquilleo a lot')
-    }
-))
+app.use('/', mainRouter);
+app.use('/users/auth', authRouter);
 app.use('/users', usersRouter);
-app.use('/transactions',transactionsRouter);
+app.use('/me/cart',cartRouter);
+app.use('/me/transactions',transactionsRouter);
 
 const port=process.env.PORT||3030;
 app.listen(port,()=>console.log(`Server is running on the port ${port}`));

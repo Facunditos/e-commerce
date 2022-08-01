@@ -31,7 +31,8 @@ const {
     findTransactionByPk,
     createTransaction,
     updateTransaction,
-    destroyTransaction
+    destroyTransaction,
+    transactionAddProduct
 }=require("../repositories/transactionsRepository");
 
 const {
@@ -45,7 +46,7 @@ const {
 }=require("../repositories/usersRepository");
 
 const transactionsController={
-    getTransactionsList:async(req,res)=>{
+    getCart:async(req,res)=>{
         const {user}=req
         try{
             // Se construye un objeto JSON con tres propiedades, en todos los casos el valor es un array, y a su vez existe correspondencia entre los respectivos índices de estas tres listas. 
@@ -65,15 +66,14 @@ const transactionsController={
             // 2- la segunda propiedad es el array de usuarios que actúan como vendedores en las transacciones listadas, como en una transacción puede incluirse más de un producto, en cada transacción puede involucrearse más de un usuario como vendedor, por lo tanto, los usuarios vendedores son agrupados por transación en sublistas,
                 // 2-A Primero se construye un listado con los id de los usuarios vendedores, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene el id del usuario vendedor. A su vez este listado está integrado por sublistas, cada una de estas sublistas se corresponde con una transacción en particular, por lo tanto, en cada sublista se incluye los id de los usuarios vendedores involucrados en una transacción en particular
             let sellers_idGroupedByTransaction=[];
-            transactions.map((transaction,indice)=>{
+            transactions.map(transaction=>{
                 let sellers_idOneTransaction=[];
-                transaction.Products.map((product,indice)=>{
+                transaction.Products.map(product=>{
                     return sellers_idOneTransaction.push(product.seller_user_id);
                 })
                 return sellers_idGroupedByTransaction.push(sellers_idOneTransaction);
             });  
                 // 2-B Luego, en base al listado anterior, se busca a los usuarios vendedores por su id, con igual lógica que la utilizada anteriormente, se hace uso de las sublistas para agrupar a los usuarios vendedores por transacción.
-            console.log(sellers_idGroupedByTransaction);
             let sellersGroupedByTransaction=[];
             await Promise.all(
                 sellers_idGroupedByTransaction.map(async sellers_idOneTransaction=>{
@@ -83,7 +83,6 @@ const transactionsController={
                  return sellersGroupedByTransaction.push(sellersOneTransaction);
                 })
             );
-            console.log(sellersGroupedByTransaction[0]);
             // 3- la tercera propiedad es el array con las categorías de los productos involucrados en las transacciones listadas, como en una transacción puede incluirse más de un producto, en cada transación puede corresponder más de una categoría de producto, por lo tanto, las categorías son agrupados por transación en sublistas
             let productsCategories_idGroupedByTransaction=[];
                 // 3-A Primero se construye un listado con los id de las categorías de los productos, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene el id de la categoría del producto. A su vez este listado está integrado por sublistas, cada una de estas sublistas se corresponde con una transacción en particular, por lo tanto, en cada sublista se incluye los id de las categorías de los productos involucrados en una transacción en particular.
@@ -122,55 +121,75 @@ const transactionsController={
             
         };
     },
-    getTransactionDetail:async (req,res)=>{
-        let {id}=req.params;
+    buyCart:async(req,res)=>{
+        const {user}=req;
         try {
-            // Se construye un objeto JSON con tres propiedades: transction, sellers y categories. 
-            // 1- la primera propiedad es el objeto que representa a una transacción, a su vez se incluyen todas las asociaciones del modelo Transaction, en particular, interesa mencionar la asociación con el modelo Product, que permite obtener el conjunto de productos involucrados en la transacción.
-            let transaction=await findTransactionByPk(id);
-            if (!transaction) return res.status(404).json({
+            const items = Object.values(req.session.cart); //get items as array
+            const totalPrice = items.reduce((acc, item) => {
+                return acc + 1 * item.quantity;
+            }, 0);
+            const body={
+                buyer_user_id:user.id,
+                totalPrice
+            };
+            console.log(body);
+            const transaction = await createTransaction(body);
+            for (const item of items) {
+                await transactionAddProduct(transaction,item)
+            }
+    
+            req.session.cart = {};
+    
+            res.status(201).json({
+                status:201,
+                message:'Transaction created',
+                transaction
+            });
+            
+        } catch(error) {
+            console.log(error)
+            res.status(500).json({
+                status:500,
+                message:'Server error'
+            });
+            
+        }
+    },
+    addToCart:async(req,res)=>{
+        const {id}=req.params;
+        try{
+            const product=await findProductByPk(id);
+            console.log(product);
+            if (!product) return res.status(404).json({
                 status:404,
-                message:'There is no transaction whit this id'
+                message:'There is no product whit this id'
             });
-            // 2- la segunda propiedad es el array de usuarios que actúan como vendedores en la transacción buscada, como en una transacción puede incluirse más de un producto, es posible que más de un usuario vendedor participe en la transación, quedando cada usuario vendedor representado mediante un objeto.
-                // 2-A Primero se construye un listado con los id de los usuarios vendedores, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene como atributo el id del usuario vendedor. 
-            
-            let sellers_id=[];
-            transaction.Products.map(product=>{
-                return sellers_id.push(product.seller_user_id);
-            });
-                // 2-B Luego, en base al listado anterior, se buscan las categorías de los productos por los id respectivos.
-            const sellers=await Promise.all(
-                sellers_id.map(seller_id=>findUserByPk(seller_id))
-            );
-            // 3- la tercera propiedad es el array con las categorías de los productos involucrados en la transacción buscada.
-                // 3-A Primero se construye un listado con los id de las categorías de los productos, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene el id de la categoría del producto.
-            let categories_id=[];
-            transaction.Products.map(product=>{
-                return categories_id.push(product.category_id);
-            });    
-                // 3-B Luego, en base al listado anterior, se buscan las categorías de los productos por los id respectivos.
-            const categories=await Promise.all(
-                categories_id.map(category_id=>findCategoryByPk(category_id))
-            );
-            
+            if (!req.session.cart[product.id]) {
+            req.session.cart[product.id] = {
+                id: product.id,
+                name: product.name,
+                /* image: product.image,
+                price: Number(
+                    (product.price - product.price * (product.disquantity / 100)).toFixed(2)
+                ), */
+                quantity: 0,
+            };
+            }
+            req.session.cart[product.id].quantity++;
             return res.status(200).json({
-            status:200,
-            transaction,
-            sellers,
-            categories
-            });
-        
+                status:200,
+                message:'Cart updated',
+                cart:req.session.cart
+            });  
         } catch(error) {
             console.log(error)
             return res.status(500).json({
                 status:500,
                 message:'Server error'
             })
-            
         }
     },
-    deleteTransaction:async(req,res)=>{
+    removeToCart:async(req,res)=>{
         let {id}=req.params;
         try {
             let transaction=await findTransactionByPk(id);

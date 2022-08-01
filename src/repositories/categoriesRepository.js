@@ -14,7 +14,6 @@ const categoriesRepository={
         const category=await Category.findByPk(id,{
             include:[
                 {association:'Products'},
-                ,
             ],
         });
         return category

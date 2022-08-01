@@ -1,4 +1,4 @@
-const {Product}=require("../database/models/index");
+const {Product,User}=require("../database/models/index");
 
 const productsRepository={
     getAllProducts:async()=>{
@@ -16,11 +16,10 @@ const productsRepository={
     findProductByPk:async(id)=>{
         const product=await Product.findByPk(id,{
             include:[
-                {association:'Seller'},
+                {association:"Seller"},
                 {association:'Sales'},
                 {association:'Transactions'},
                 {association:'Category'},
-                ,
             ],
         });
         return product
