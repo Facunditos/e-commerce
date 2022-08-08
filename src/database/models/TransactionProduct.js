@@ -2,53 +2,47 @@
 const {
   Model
 } = require('sequelize');
-const Product = require('./Product');
 module.exports = (sequelize, DataTypes) => {
-  class Transaction_Detail extends Model {
+  class TransactionProduct extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
-      Transaction_Detail.belongsTo(models.Transaction,{
+     static associate(models) {
+      TransactionProduct.belongsTo(models.Transaction,{
         as:'Transaction',
         foreignKey:'transaction_id'
       });
-      Transaction_Detail.belongsTo(models.Transaction,{
+      TransactionProduct.belongsTo(models.Product,{
         as:'Product',
         foreignKey:'product_id'
       });
     }
   }
-  Transaction_Detail.init({
+  TransactionProduct.init({
     transaction_id: {
       type:DataTypes.INTEGER,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
     product_id: {
       type:DataTypes.INTEGER,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
+    },
+    price: {
+      type:DataTypes.FLOAT(25,2),
+      allowNull:false,
     },
     quantity: {
       type:DataTypes.INTEGER,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
-    }
+      allowNull:false,
+    },
+    deletedAt: DataTypes.DATE
   }, {
     sequelize,
-    modelName: 'Transaction_Detail',
+    modelName: 'TransactionProduct',
+    tableName:'Transaction_Product',
+    paranoid:true
   });
-  return Transaction_Detail;
+  return TransactionProduct;
 };

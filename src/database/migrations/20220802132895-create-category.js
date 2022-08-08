@@ -1,6 +1,6 @@
 'use strict';
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Categories', {
       id: {
         allowNull: false,
@@ -9,10 +9,14 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING(150)
+        type: Sequelize.STRING(50),
+        allowNull:false,
+        unique:true
       },
       description: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        allowNull:false,
+        defaultValue:"This category doesn't have a category",
       },
       deletedAt: {
         type: Sequelize.DATE
@@ -27,7 +31,7 @@ module.exports = {
       }
     });
   },
-  down: async (queryInterface, Sequelize) => {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Categories');
   }
 };

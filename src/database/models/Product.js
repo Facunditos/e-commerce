@@ -9,14 +9,14 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+     static associate(models) {
       Product.belongsToMany(models.Transaction,{
         as:"Transactions",
-        through:models.Transaction_Detail,
+        through:models.TransactionProduct,
         foreignKey:"product_id",
         otherKey:"transaction_id"
       });
-      Product.hasMany(models.Transaction_Detail,{
+      Product.hasMany(models.TransactionProduct,{
         as:"Sales",
         foreignKey:"product_id"
       });
@@ -29,57 +29,37 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey:"category_id"
       });
     }
-  };
+  }
   Product.init({
     name: {
       type:DataTypes.STRING(150),
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
     description: {
       type:DataTypes.TEXT,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      defaultValue:'producto sin descripción',
     },
-    quantity: {
-      type:DataTypes.INTEGER,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
-    },
-    status: {
-      type:DataTypes.STRING(20),
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+    price: {
+      type:DataTypes.FLOAT(25,2),
+      allowNull:false,
     },
     seller_user_id: {
       type:DataTypes.INTEGER,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
     category_id: {
       type:DataTypes.INTEGER,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
-    deletedAt:DataTypes.DATE
+    stock: {
+      type:DataTypes.INTEGER,
+      allowNull:false,
+    },
+    status: {
+      type:DataTypes.STRING(150),
+      allowNull:false,
+    },
+    deletedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Product',

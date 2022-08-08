@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+     static associate(models) {
       Transaction.belongsToMany(models.Product,{
         as:"Products",
-        through:models.Transaction_Detail,
+        through:models.TransactionProduct,
         foreignKey:"transaction_id",
         otherKey:"product_id"
       });
@@ -20,22 +20,22 @@ module.exports = (sequelize, DataTypes) => {
         as:"Buyer",
         foreignKey:"buyer_user_id"
       });
-      Transaction.hasMany(models.Transaction_Detail,{
+      Transaction.hasMany(models.TransactionProduct,{
         as:"Details",
         foreignKey:"transaction_id"
       });
     }
-  };
+  }
   Transaction.init({
     buyer_user_id: {
       type:DataTypes.INTEGER,
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
-    deletedAt:DataTypes.DATE
+    worth: {
+      type:DataTypes.FLOAT(25,2),
+      allowNull:false,
+    },
+    deletedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Transaction',

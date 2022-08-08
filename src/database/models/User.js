@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+     static associate(models) {
       User.hasMany(models.Transaction,{
         as:"Buys",
         foreignKey:"buyer_user_id"
@@ -19,44 +19,30 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey:"seller_user_id"
       });
     }
-  };
+  }
   User.init({
     first_name: {
       type:DataTypes.STRING(150),
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
     last_name: {
       type:DataTypes.STRING(150),
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
     email: {
       type:DataTypes.STRING(150),
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      unique:true,
+      allowNull:false,
     },
     password: {
       type:DataTypes.STRING(150),
-      validate: {
-        notEmpty: true,
-        notNull: true,
-      },
-      allowNull: false,
+      allowNull:false,
     },
-    is_admin:{     
+    is_admin: {
       type:DataTypes.BOOLEAN,
-      defaultValue:false
-    } ,
+      defaultValue:false,
+      allowNull:false,
+    },
     deletedAt: DataTypes.DATE
   }, {
     sequelize,

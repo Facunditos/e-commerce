@@ -1,8 +1,8 @@
-const {Transaction_Detail}=require("../database/models/index");
+const {TransactionProduct}=require("../database/models/index");
 
 const transactions_productsRepository={
     getAllTransactionsDetails:async()=>{
-        const transactionsDetails=await Transaction_Detail.findAll({
+        const transactionsDetails=await TransactionProduct.findAll({
             include:[
                 {association:'Transaction',},
                 {association:'Product',},
@@ -11,7 +11,7 @@ const transactions_productsRepository={
         return transactionsDetails
     },
     findTransactionDetailByPk:async (id)=>{
-        const transactionDetail= await Transaction_Detail.findByPk(id,{
+        const transactionDetail= await TransactionProduct.findByPk(id,{
             include:[
                 {association:'Transaction',},
                 {association:'Product',},
@@ -20,7 +20,7 @@ const transactions_productsRepository={
         return transactionDetail
     },
     findTransactionDetailsByTransaction:async(transaction_id)=>{
-        const transactionDetails=await Transaction_Detail.findAll({
+        const transactionDetails=await TransactionProduct.findAll({
             where:{
                 transaction_id
             },
@@ -32,12 +32,12 @@ const transactions_productsRepository={
         return transactionDetails
     },
     createTransactionDetail :async(body)=>{
-        await Transaction_Detail.create({
+        await TransactionProduct.create({
             transaction_id:body.transaction_id,
             product_id:body.product_id,
             quantity:product.quantity
         });
-        const transactionDetail=await Transaction_Detail.findByPk(transactionDetail.id,{
+        const transactionDetail=await TransactionProduct.findByPk(transactionDetail.id,{
             include:[
                 {association:'Transaction',},
                 {association:'Product',},
@@ -46,7 +46,7 @@ const transactions_productsRepository={
         return transactionDetail
     },
     updateTransactionDetail :async(id,body)=>{
-        let transactionDetail=await Transaction_Detail.update({
+        let transactionDetail=await TransactionProduct.update({
             where:{
                 id
             }
@@ -55,7 +55,7 @@ const transactions_productsRepository={
             product_id:body.product_id,
             quantity:product.quantity
         });
-        transactionDetail=await Transaction_Detail.findByPk(transactionDetail.id,{
+        transactionDetail=await TransactionProduct.findByPk(transactionDetail.id,{
             include:[
                 {association:'Transaction',},
                 {association:'Product',},
@@ -64,7 +64,7 @@ const transactions_productsRepository={
         return transactionDetail
     },
     destroyTransactionDetail:async(id)=>{
-        return await Transaction_Detail.destroy({
+        return await TransactionProduct.destroy({
             where:{
                 id
             }
