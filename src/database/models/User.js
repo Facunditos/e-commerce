@@ -24,24 +24,39 @@ module.exports = (sequelize, DataTypes) => {
     first_name: {
       type:DataTypes.STRING(150),
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     last_name: {
       type:DataTypes.STRING(150),
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     email: {
       type:DataTypes.STRING(150),
       unique:true,
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     password: {
       type:DataTypes.STRING(150),
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     is_admin: {
       type:DataTypes.BOOLEAN,
-      defaultValue:false,
       allowNull:false,
+      defaultValue:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     deletedAt: DataTypes.DATE
   }, {

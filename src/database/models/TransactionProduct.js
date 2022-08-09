@@ -24,18 +24,30 @@ module.exports = (sequelize, DataTypes) => {
     transaction_id: {
       type:DataTypes.INTEGER,
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     product_id: {
       type:DataTypes.INTEGER,
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     price: {
       type:DataTypes.FLOAT(25,2),
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     quantity: {
       type:DataTypes.INTEGER,
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     deletedAt: DataTypes.DATE
   }, {

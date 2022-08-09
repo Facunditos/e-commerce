@@ -34,6 +34,9 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type:DataTypes.STRING(150),
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     description: {
       type:DataTypes.TEXT,
@@ -42,22 +45,37 @@ module.exports = (sequelize, DataTypes) => {
     price: {
       type:DataTypes.FLOAT(25,2),
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     seller_user_id: {
       type:DataTypes.INTEGER,
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     category_id: {
       type:DataTypes.INTEGER,
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     stock: {
       type:DataTypes.INTEGER,
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     status: {
       type:DataTypes.STRING(150),
       allowNull:false,
+      validate:{
+        notEmpty:true,
+      },
     },
     deletedAt: DataTypes.DATE
   }, {
