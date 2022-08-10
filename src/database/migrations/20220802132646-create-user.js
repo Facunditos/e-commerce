@@ -29,6 +29,11 @@ module.exports = {
         defaultValue:false,
         type: Sequelize.BOOLEAN
       },
+      image_url: {
+        allowNull: false,
+        defaultValue:"https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png",
+        type: Sequelize.STRING(150)
+      },
       deletedAt: {
         type: Sequelize.DATE
       },

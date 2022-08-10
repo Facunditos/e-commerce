@@ -1,6 +1,6 @@
 const { check} = require('express-validator');
 const { validate } = require('../util/validateHelper');
-const { findByEmail } = require('../repositories/usersRepository');
+const { findUserByEmail} = require('../repositories/usersRepository');
 
 const validateRegister = [
     check('first_name','first_name is required and it has to include at least three letters')
@@ -10,9 +10,8 @@ const validateRegister = [
     check('email')
         .isEmail().withMessage('email has to be valid')
         .custom(async function (email) {
-                const user=await findByEmail(email);
+                const user=await findUserByEmail(email);
                 if (user) throw new Error('This email already exits');
-                console.log('vamos');
                 
         }),
     check('password','password has to include at least six characters, one lowercase letter, one uppercase letter and one number')

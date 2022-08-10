@@ -6,7 +6,6 @@ const {
     registerUser,
     loginUser,
 }=require('../controllers/authController');
-
 router.post('/register',validateRegister,registerUser);
 router.post('/login',validateLogin,loginUser);
 

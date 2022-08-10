@@ -1,4 +1,6 @@
-require("dotenv").config()
+require("dotenv").config();
+
+const uploadToBucket=require("../services/AWS_S3");
 const {
     getAllCategories,
     findCategoryByPk,
@@ -45,15 +47,21 @@ const {
 
 const bcryptjs=require("bcryptjs");
 const jwt=require("jsonwebtoken");
+const path=require("path")
 
 const authController={
     registerUser:async(req,res)=>{
+        let {body}=req;
+        const {file}=req.files;
+        const bucket="ecommerce1287/user-img";
+        const key=`user-${Date.now()}${path.extname(file.name)}`;
+        body.password=bcryptjs.hashSync(body.password,10);
+        if (file) body.image_url=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/${key}`;
+        const adminUsers=["e_commerce@gmail.com","facundolopezcrespo@hotmail.com"];
         try {
-            let {body}=req;
-            body.password=bcryptjs.hashSync(body.password,10);
-            const adminUsers=["e_commerce@gmail.com","facundolopezcrespo@hotmail.com"]
+            await uploadToBucket(bucket,key,file);
             if (adminUsers.includes(body.email)) body.is_admin=true;
-            let user=await createUser(body);
+            const user=await createUser(body);
             res.status(201).json({
                 status:201,
                 message:'User created',

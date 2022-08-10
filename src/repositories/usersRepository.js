@@ -47,6 +47,7 @@ const usersRepository={
             email:body.email,
             password:body.password,
             is_admin:body.is_admin,
+            image_url:body.image_url
         });
         user=await User.findByPk(user.id,{
             include:[
@@ -63,6 +64,7 @@ const usersRepository={
             email:body.email,
             password:body.password,
             is_admin:body.is_admin,
+            image_url:body.image_url
         },{
             where:{
                 id
