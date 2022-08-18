@@ -43,6 +43,10 @@ module.exports = {
         type: Sequelize.STRING(20),
         allowNull:false,
       },
+      image_url: {
+        allowNull: false,
+        type: Sequelize.STRING(150)
+      },
       deletedAt: {
         type: Sequelize.DATE
       },

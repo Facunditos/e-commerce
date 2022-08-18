@@ -1,7 +1,9 @@
 require("dotenv").config()
 const {
     getAllCategories,
+    searchCategoriesByName,
     findCategoryByPk,
+    findCategoryByName,
     createCategory,
     updateCategory,
     destroyCategory
@@ -38,7 +40,6 @@ const {
     getAllUsers,
     findUserByPk,
     findUserByEmail,
-    findUsersByType,
     createUser,
     updateUser,
     destroyUser
@@ -46,13 +47,15 @@ const {
 
 const transactionsController={
     getTransactionsList:async(req,res)=>{
-        const {user}=req
+        const {user}=req;
+    
         try{
             // Se construye un objeto JSON con tres propiedades, en todos los casos el valor es un array, y a su vez existe correspondencia entre los respectivos índices de estas tres listas. 
             // 1- la primera propiedad  es el array de transacciones que contiene tanto objetos como transacciones existan, a su vez se incluyen todas las asociaciones del modelo Transaction.
-            let transactions
+            let transactions=await getAllTransactions();
+            return res.render("transactions",{transactions})
             if (user.is_admin) {
-                transactions=await getAllTransactions()
+                transactions=await getAllTransactions();
             } else {
                transactions=await getAllTransactionsByBuyer(user.id)
             }

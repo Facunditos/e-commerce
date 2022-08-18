@@ -1,25 +1,23 @@
 const express=require('express');
 const router=express.Router();
-const verifyToken=require("../middlewares/verifyToken")
-const verifyIsAdmin=require("../middlewares/verifyIsAdmin")
-const {validateRegister,validateLogin,validateUpdate}=require("../middlewares/usersValidator")
+const verifyToken=require("../middlewares/verifyToken");
+const verifyIsAdmin=require("../middlewares/verifyIsAdmin");
+const {validateUpdate}=require("../middlewares/usersValidator");
 
 const {
     getUsersList,
     getUserDetail,
-    searchUserByType,
-    registerUser,
-    loginUser,
+    searchUsersByEmail,
     updateUser,
-    deleteUser
+    deleteUser,
 }=require('../controllers/usersController');
 
 
 
 router.get('/',verifyToken,verifyIsAdmin,getUsersList);
-router.get('/:id',verifyToken,verifyIsAdmin,getUserDetail);
-router.get('/search',verifyToken,verifyIsAdmin,searchUserByType);
+router.get('/search',verifyToken,verifyIsAdmin,searchUsersByEmail);
+router.get('/:id',verifyToken,getUserDetail);
 router.put('/:id',verifyToken,validateUpdate,updateUser);
-router.delete("/:id",verifyToken,deleteUser);
+router.delete('/:id',verifyToken,deleteUser);
 
 module.exports=router

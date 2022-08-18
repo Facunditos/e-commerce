@@ -16,6 +16,7 @@ const usersList=
         password:undefined,
         email:undefined,
         is_admin:false,
+        image_url:faker.image.avatar(),
         createdAt:faker.date.recent(365*2),
         updatedAt:undefined,
         deletedAt:null
@@ -33,6 +34,7 @@ const usersList=
         email:"ecommerce1287@gmai.com",
         password:createHashPassword('Admin'),
         is_admin:true,
+        image_url:"https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png",
         createdAt:new Date,
         updatedAt:new Date,
         deletedAt:null

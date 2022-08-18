@@ -1,4 +1,5 @@
 const {User}=require("../database/models/index");
+const {Op}=require('sequelize')
 
 const usersRepository={
     getAllUsers:async()=>{
@@ -31,19 +32,22 @@ const usersRepository={
         });
         return user
     },
-    findUsersByType:async(type)=>{
-        //falta desarrollar este apartado, debería incluirse únicamente a aquellos usuarios que hayan efectuados transacciones
-        if (type=buyer) {
-           const users=await User.findAll({
-                include:[{association:'Buys'}],
-            })
-            return users;
-        }
+    searchUsersByEmail:async(email)=>{
+        const users=await User.findAll({
+            where:{
+                email:{[Op.like]:`%${email}%`}
+            },
+            include:[
+                {association:'Buys'},
+                {association:'ProductsOnSale'},
+            ],
+        });
+        return users
     },
     createUser:async(body)=>{
         let user=await User.create({
-            last_name:body.first_name,
             first_name:body.first_name,
+            last_name:body.last_name,
             email:body.email,
             password:body.password,
             is_admin:body.is_admin,

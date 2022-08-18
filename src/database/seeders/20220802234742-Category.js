@@ -19,7 +19,7 @@ Array(uniquesCategories.length)
     .map((value,index)=>{
         return {
             name:uniquesCategories[index],
-            description:"This category doesn't have a category",
+            description:"This category doesn't have a name",
             createdAt:faker.date.recent(365*2),
             updatedAt:undefined,
             deletedAt:null

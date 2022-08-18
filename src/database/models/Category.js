@@ -27,7 +27,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type:DataTypes.TEXT,
-      defaultValue:'categoría sin descripción',
+      allowNull:false,
+      defaultValue:'category without description',
     },
     deletedAt: DataTypes.DATE
   }, {

@@ -1,5 +1,5 @@
 const {Product,User}=require("../database/models/index");
-
+const {Op}=require("sequelize")
 const productsRepository={
     getAllProducts:async()=>{
         const products=await Product.findAll({
@@ -7,8 +7,21 @@ const productsRepository={
                 {association:'Seller'},
                 {association:'Sales'},
                 {association:'Transactions'},
-                {association:'Category'},
-                ,
+                {association:'Category'}
+            ],
+        });
+        return products
+    },
+    getAllProductsBySeller:async(seller_user_id)=>{
+        const products=await Product.findAll({
+            where:{
+                seller_user_id
+            },
+            include:[
+                {association:'Seller'},
+                {association:'Sales'},
+                {association:'Transactions'},
+                {association:'Category'}
             ],
         });
         return products

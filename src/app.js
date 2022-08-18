@@ -7,6 +7,7 @@ const fileUpload=require("express-fileupload");
 const mainRouter=require("./routes/main");
 const authRouter=require("./routes/auth");
 const usersRouter=require("./routes/users");
+const categoriesRouter=require("./routes/categories");
 const cartRouter=require("./routes/cart");
 const transactionsRouter=require("./routes/transactions");
 const cartMiddleware=require("../src/middlewares/cartMiddleware");
@@ -34,6 +35,7 @@ app.use(logger("dev"));
 app.use('/', mainRouter);
 app.use('/users/auth', authRouter);
 app.use('/users', usersRouter);
+app.use('/categories', categoriesRouter);
 app.use('/me/cart',cartRouter);
 app.use('/me/transactions',transactionsRouter);
 

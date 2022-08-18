@@ -1,7 +1,9 @@
 require("dotenv").config()
 const {
     getAllCategories,
+    searchCategoriesByName,
     findCategoryByPk,
+    findCategoryByName,
     createCategory,
     updateCategory,
     destroyCategory
@@ -39,7 +41,6 @@ const {
     getAllUsers,
     findUserByPk,
     findUserByEmail,
-    findUsersByType,
     createUser,
     updateUser,
     destroyUser
