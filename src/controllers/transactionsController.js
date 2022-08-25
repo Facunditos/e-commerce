@@ -54,7 +54,7 @@ const transactionsController={
             // 1- la primera propiedad  es el array de transacciones que contiene tanto objetos como transacciones existan, a su vez se incluyen todas las asociaciones del modelo Transaction.
             let transactions=await getAllTransactions();
             return res.render("transactions",{transactions})
-            if (user.is_admin) {
+            if (user.Role.name=="Admin") {
                 transactions=await getAllTransactions();
             } else {
                transactions=await getAllTransactionsByBuyer(user.id)

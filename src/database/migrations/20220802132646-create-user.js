@@ -25,9 +25,13 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING(150)
       },
-      is_admin: {
-        defaultValue:false,
-        type: Sequelize.BOOLEAN
+      role_id: {
+        type: Sequelize.INTEGER,
+        allowNull:false,
+        references:{
+          model:"Roles",
+          key:"id"
+        }
       },
       image_url: {
         allowNull: false,

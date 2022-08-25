@@ -15,6 +15,14 @@ const validateRegister = [
         }),
     check('password','Must have at least 6 characters, one lowercase letter, one uppercase letter, one number and one symbol')
         .isStrongPassword({minLength: 6,minLowercase: 1,minUppercase: 1,minNumbers: 1,minSymbols: 1,}),
+    check('role_id','Choose a role is required')
+        .custom((chosenRoleId)=>{
+            const chosenRoleIdAsNumber=parseInt(chosenRoleId);
+            const validRoleId=[2,3];
+            if (!validRoleId.includes(chosenRoleIdAsNumber))
+                throw new Error();
+            return true
+        }),
     check('file')
         .custom((value,{req})=>{
             if (req.files) {

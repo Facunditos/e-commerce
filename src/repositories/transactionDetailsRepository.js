@@ -35,7 +35,7 @@ const transactions_productsRepository={
         await TransactionProduct.create({
             transaction_id:body.transaction_id,
             product_id:body.product_id,
-            quantity:product.quantity
+            stock:product.stock
         });
         const transactionDetail=await TransactionProduct.findByPk(transactionDetail.id,{
             include:[
@@ -53,7 +53,7 @@ const transactions_productsRepository={
         },{
             transaction_id:body.transaction_id,
             product_id:body.product_id,
-            quantity:product.quantity
+            stock:product.stock
         });
         transactionDetail=await TransactionProduct.findByPk(transactionDetail.id,{
             include:[

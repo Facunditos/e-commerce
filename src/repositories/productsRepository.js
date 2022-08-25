@@ -41,9 +41,13 @@ const productsRepository={
         let product=await Product.create({
             name:body.name,
             description:body.description,
-            quantity:body.quantity,
-            status:body.status,
+            price:body.price,
             seller_user_id:body.seller_user_id,
+            category_id:body.category_id,
+            stock:body.stock,
+            status:body.status,
+            image_url:body.image_url,
+            
         });
         product=await Product.findByPk(product.id,{
             include:[
@@ -60,21 +64,22 @@ const productsRepository={
         let product=await Product.update({
             name:body.name,
             description:body.description,
-            quantity:body.quantity,
+            price:body.price,
+            category_id:body.category_id,
+            stock:body.stock,
             status:body.status,
-            seller_user_id:body.seller_user_id,
+            image_url:body.image_url,
         },{
             where:{
                 id
             }
         });
-        product=await Product.findByPk(product.id,{
+        product=await Product.findByPk(id,{
             include:[
                 {association:'Seller'},
                 {association:'Sales'},
                 {association:'Transactions'},
                 {association:'Category'},
-                ,
             ],
         });
         return product

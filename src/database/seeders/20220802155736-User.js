@@ -1,6 +1,10 @@
-'use strict';
+
 const {faker}=require("@faker-js/faker");
-const bcryptjs=require('bcryptjs')
+const bcryptjs=require('bcryptjs');
+function assingRoleId(index) {
+  if (index%2==0) return 2 ;
+  return 3
+};
 function createHashPassword(first_name) {
     const password=`${first_name}1234$`;
     return bcryptjs.hashSync(password)
@@ -9,13 +13,13 @@ function createHashPassword(first_name) {
 const usersList=
     Array(50)
     .fill(0)
-    .map(()=>{
+    .map((e,index)=>{
         return {
         first_name:faker.name.firstName(),
         last_name:faker.name.lastName(),
         password:undefined,
         email:undefined,
-        is_admin:false,
+        role_id:assingRoleId(index),
         image_url:faker.image.avatar(),
         createdAt:faker.date.recent(365*2),
         updatedAt:undefined,
@@ -33,10 +37,10 @@ const usersList=
         last_name:"Admin",
         email:"ecommerce1287@gmai.com",
         password:createHashPassword('Admin'),
-        is_admin:true,
+        role_id:1,
         image_url:"https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png",
-        createdAt:new Date,
-        updatedAt:new Date,
+        createdAt:new Date("2017-01-15 08:30:45"),
+        updatedAt:new Date("2017-01-15 08:30:45"),
         deletedAt:null
     },0,1);
 module.exports = {

@@ -48,78 +48,17 @@ const {
 
 const transactionsController={
     getCart:async(req,res)=>{
-        const {user}=req
-        try{
-            // Se construye un objeto JSON con tres propiedades, en todos los casos el valor es un array, y a su vez existe correspondencia entre los respectivos índices de estas tres listas. 
-            // 1- la primera propiedad  es el array de transacciones que contiene tanto objetos como transacciones existan, a su vez se incluyen todas las asociaciones del modelo Transaction.
-            let transactions
-            if (user.is_admin) {
-                transactions=await getAllTransactions()
-            } else {
-               transactions=await getAllTransactionsByBuyer(user.id)
-            }
-            ;
-            if (transactions.length===0) return res.status(404).json({
-                status:404,
-                message:'There is no transaction'
-            });
-
-            // 2- la segunda propiedad es el array de usuarios que actúan como vendedores en las transacciones listadas, como en una transacción puede incluirse más de un producto, en cada transacción puede involucrearse más de un usuario como vendedor, por lo tanto, los usuarios vendedores son agrupados por transación en sublistas,
-                // 2-A Primero se construye un listado con los id de los usuarios vendedores, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene el id del usuario vendedor. A su vez este listado está integrado por sublistas, cada una de estas sublistas se corresponde con una transacción en particular, por lo tanto, en cada sublista se incluye los id de los usuarios vendedores involucrados en una transacción en particular
-            let sellers_idGroupedByTransaction=[];
-            transactions.map(transaction=>{
-                let sellers_idOneTransaction=[];
-                transaction.Products.map(product=>{
-                    return sellers_idOneTransaction.push(product.seller_user_id);
-                })
-                return sellers_idGroupedByTransaction.push(sellers_idOneTransaction);
-            });  
-                // 2-B Luego, en base al listado anterior, se busca a los usuarios vendedores por su id, con igual lógica que la utilizada anteriormente, se hace uso de las sublistas para agrupar a los usuarios vendedores por transacción.
-            let sellersGroupedByTransaction=[];
-            await Promise.all(
-                sellers_idGroupedByTransaction.map(async sellers_idOneTransaction=>{
-                let sellersOneTransaction=await Promise.all(
-                    sellers_idOneTransaction.map(seller_id=> findUserByPk(seller_id))
-                );
-                 return sellersGroupedByTransaction.push(sellersOneTransaction);
-                })
-            );
-            // 3- la tercera propiedad es el array con las categorías de los productos involucrados en las transacciones listadas, como en una transacción puede incluirse más de un producto, en cada transación puede corresponder más de una categoría de producto, por lo tanto, las categorías son agrupados por transación en sublistas
-            let productsCategories_idGroupedByTransaction=[];
-                // 3-A Primero se construye un listado con los id de las categorías de los productos, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene el id de la categoría del producto. A su vez este listado está integrado por sublistas, cada una de estas sublistas se corresponde con una transacción en particular, por lo tanto, en cada sublista se incluye los id de las categorías de los productos involucrados en una transacción en particular.
-            transactions.map(e=>{
-                let productsCategories_idOneTransaction=[];
-                e.Products.map(product=>{
-                    return productsCategories_idOneTransaction.push(product.category_id);
-                });
-                return productsCategories_idGroupedByTransaction.push(productsCategories_idOneTransaction);
-            });  
-            let productsCategoriesGroupedByTransaction=[];
-                // 3-B Luego, en base al listado anterior, se buscan las categorías de los productos por los id respectivos, con igual lógica que la utilizada anteriormente, se hace uso de las sublistas para agruparlas por transacción.
-            await Promise.all(
-                productsCategories_idGroupedByTransaction.map(async productsCategories_idOneTransaction=>{
-                    let categoriesProductsOneTransaction=await Promise.all(
-                        productsCategories_idOneTransaction.map(category_id=> findCategoryByPk(category_id))
-                    );
-                    return productsCategoriesGroupedByTransaction.push(categoriesProductsOneTransaction);
-                })
-            );
-            
+        const cart=Object.values(req.session.cart);
+        if (cart.length==0) {
+            return res.status(404).json({
+                status:200,
+                message:'The cart is empty',
+            }); 
+        } else {
             return res.status(200).json({
                 status:200,
-                transactions,
-                sellersGroupedByTransaction,
-                productsCategoriesGroupedByTransaction
-            });
-            //return res.render("transactions",{transactions,sellersGroupedByTransaction,productsCategoriesGroupedByTransaction})
-
-        } catch(error) {
-            console.log(error);
-            return res.status(500).json({
-                status:500,
-                message:'Server error'
-            });
-            
+                cart,
+            }); 
         };
     },
     buyCart:async(req,res)=>{
@@ -160,6 +99,98 @@ const transactionsController={
         const {id}=req.params;
         try{
             const product=await findProductByPk(id);
+            if (!product) return res.status(404).json({
+                status:404,
+                message:'There is no product whit this id'
+            });
+            if (product.status!='active') return res.status(404).json({
+                status:400,
+                message:'We do not have stock of this product. Choose others'
+            });
+            // Este código comentado se importó de MercadoLiebre. En mi desarollo no sirve porque este método es consumido únicamente para implentar la funcionalidad de agregar una unidad de un nuevo producto al carrito, para modificar las unidades del producto sumado, se utilizadn otros métodos
+            /* if (!req.session.cart[product.id]) {
+            req.session.cart[product.id] = {
+                id: product.id,
+                name: product.name,
+                image: product.image,
+                price: product.image_url,
+                quantity: 0,
+            };
+            }
+            req.session.cart[product.id].quantity++; */
+
+            //Al objeto req.session.cart se le agrega una propiedad que tiene como clave el id del nuevo producto sumado al carrito. El valor de la propiedad es un objeto que informa id, url de la imagen, nombre y cantidad de este producto. La cantidad refiere a la unidad sumada al carro, no al stock del producto.  
+            req.session.cart[product.id] = {
+                id: product.id,
+                image: product.image_url,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+            };
+            //Por ser adquirida una unidad del producto, corresponde ajustar su stock, y en el caso que el stock ajustado sea igual a cero, debiera también cambiarse el atributo "status" de activo a inactivo. 
+            product.stock--;
+            if (product.stock==0) product.status='inactive';
+            await updateProduct(product,product.id);
+            return res.status(200).json({
+                status:200,
+                message:'Product added to cart',
+                cart:req.session.cart
+            });  
+        } catch(error) {
+            console.log(error)
+            return res.status(500).json({
+                status:500,
+                message:'Server error'
+            })
+        }
+    },
+    setQuantity:async(req,res)=>{
+        const {id}=req.params;
+        const {quantity}=req.body;
+        try{
+            const product=await findProductByPk(id);
+            if (!product) return res.status(404).json({
+                status:404,
+                message:'There is no product whit this id'
+            });
+            if (product.status!='active') return res.status(404).json({
+                status:400,
+                message:'We do not have stock of this product. Choose others'
+            });
+            if (quantity>product.stock) return res.status(404).json({
+                status:400,
+                message:`We do not have enough stock of this product. You can buy ${product.stock} as maxium` 
+            });
+
+            //Al objeto req.session.cart se le agrega una propiedad que tiene como clave el id del nuevo producto sumado al carrito. El valor de la propiedad es un objeto que informa id, url de la imagen, nombre y cantidad de este producto. La cantidad refiere a la unidad sumada al carro, no al stock del producto.  
+            req.session.cart[product.id] = {
+                id: product.id,
+                image: product.image_url,
+                name: product.name,
+                price: product.price,
+                quantity,
+            };
+            //Por ser adquirida una unidad del producto, corresponde ajustar su stock, y en el caso que el stock ajustado sea igual a cero, debiera también cambiarse el atributo "status" de activo a inactivo. 
+            product.stock-=quantity;
+            if (product.stock==0) product.status='inactive';
+            await updateProduct(product,product.id);
+            return res.status(200).json({
+                status:200,
+                message:'Product added to cart',
+                cart:req.session.cart
+            });  
+        } catch(error) {
+            console.log(error)
+            return res.status(500).json({
+                status:500,
+                message:'Server error'
+            })
+        }
+    },
+    increaseQuantity:async(req,res)=>{
+        const {id}=req.params;
+        try{
+            const product=await findProductByPk(id);
             console.log(product);
             if (!product) return res.status(404).json({
                 status:404,
@@ -190,7 +221,41 @@ const transactionsController={
             })
         }
     },
-    removeToCart:async(req,res)=>{
+    decreseQuantity:async(req,res)=>{
+        const {id}=req.params;
+        try{
+            const product=await findProductByPk(id);
+            console.log(product);
+            if (!product) return res.status(404).json({
+                status:404,
+                message:'There is no product whit this id'
+            });
+            if (!req.session.cart[product.id]) {
+            req.session.cart[product.id] = {
+                id: product.id,
+                name: product.name,
+                /* image: product.image,
+                price: Number(
+                    (product.price - product.price * (product.disquantity / 100)).toFixed(2)
+                ), */
+                quantity: 0,
+            };
+            }
+            req.session.cart[product.id].quantity++;
+            return res.status(200).json({
+                status:200,
+                message:'Cart updated',
+                cart:req.session.cart
+            });  
+        } catch(error) {
+            console.log(error)
+            return res.status(500).json({
+                status:500,
+                message:'Server error'
+            })
+        }
+    },
+    removeFromCart:async(req,res)=>{
         let {id}=req.params;
         try {
             let transaction=await findTransactionByPk(id);

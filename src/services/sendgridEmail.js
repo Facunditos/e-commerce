@@ -3,9 +3,7 @@ const sgMail=require("@sendgrid/mail")
 
 const sendWelcomeEmail= async function(newUserEmail,newUserFirstName) {
     try{
-        console.log(process.env.SENDGRID_API_KEY);
-        console.log(process.env.SENDGRID_SENDER);
-        await sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY)
         const msg={
             to:newUserEmail,
             from:process.env.SENDGRID_SENDER,

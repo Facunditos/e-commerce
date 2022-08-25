@@ -7,6 +7,8 @@ const usersRepository={
             include:[
                 {association:'Buys'},
                 {association:'ProductsOnSale'},
+                {association:'Role'}
+
             ],
         });
         return users
@@ -16,6 +18,8 @@ const usersRepository={
             include:[
                 {association:'Buys'},
                 {association:'ProductsOnSale'},
+                {association:'Role'}
+
             ],
         });
         return user
@@ -28,6 +32,8 @@ const usersRepository={
             include:[
                 {association:'Buys'},
                 {association:'ProductsOnSale'},
+                {association:'Role'}
+
             ],
         });
         return user
@@ -40,6 +46,8 @@ const usersRepository={
             include:[
                 {association:'Buys'},
                 {association:'ProductsOnSale'},
+                {association:'Role'}
+
             ],
         });
         return users
@@ -50,13 +58,16 @@ const usersRepository={
             last_name:body.last_name,
             email:body.email,
             password:body.password,
-            is_admin:body.is_admin,
+            role_id:body.role_id,
+            edad:body.edad,
             image_url:body.image_url
         });
         user=await User.findByPk(user.id,{
             include:[
                 {association:'Buys'},
                 {association:'ProductsOnSale'},
+                {association:'Role'}
+
             ],
         });
         return user;
@@ -67,7 +78,6 @@ const usersRepository={
             last_name:body.last_name,
             email:body.email,
             password:body.password,
-            is_admin:body.is_admin,
             image_url:body.image_url
         },{
             where:{
@@ -78,6 +88,8 @@ const usersRepository={
             include:[
                 {association:'Buys'},
                 {association:'ProductsOnSale'},
+                {association:'Role'}
+
             ],
         });
         return user

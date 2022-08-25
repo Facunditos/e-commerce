@@ -11,7 +11,16 @@ const verifyToken=(req,res,next)=> {
                 detail:error.message
             }) ;
         };
-        req.user=resolve.payload
+        req.user=resolve.payload;
+        const array=token.split("");
+        const arrayLimpio=[]
+        array.map(caracter=>{
+            if (caracter!="-" && caracter!=".")
+            arrayLimpio.push(caracter);
+
+        });
+        const string=arrayLimpio.join("");
+        req.user.token=string;
         return next()
         }
     )

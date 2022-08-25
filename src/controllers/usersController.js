@@ -112,7 +112,7 @@ const usersController={
                 message:'There is no user whit this id'
             });
             // A menos que quien realice la petición sea el usuario administrador, se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición, 
-            if (userInToken.id!==userInDB.id&&userInToken.is_admin==false) 
+            if (userInToken.id!==userInDB.id&&userInToken.Role.name!="Admin") 
                 return res.status(403).json({
                     status:403,
                     message:`${req.user.first_name}, you don't have permission to do it`,

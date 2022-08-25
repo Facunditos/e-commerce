@@ -31,7 +31,7 @@ module.exports = {
       
       
         return {
-        buyer_user_id:assignRandomOddIntegerBetween(1,usersList.length),
+        buyer_user_id:assignRandomOddIntegerBetween(3,usersList.length),
         worth:undefined,
         createdAt:faker.date.recent(365*2),
         updatedAt:undefined,

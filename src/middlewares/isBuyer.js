@@ -1,7 +1,6 @@
-const verifyIsAdmin=(req,res,next)=> {
+const isBuyer=(req,res,next)=> {
     const {user}=req;
-    console.log(user);
-    if (user.Role.name!="Admin") {
+    if (user.Role.name!="Buyer") {
         return res.status(403).json({
             status:403,
             message:`${req.user.first_name}, you don't have permission to do it`,
@@ -10,4 +9,4 @@ const verifyIsAdmin=(req,res,next)=> {
     return next()
 }
 
-module.exports=verifyIsAdmin
+module.exports=isBuyer

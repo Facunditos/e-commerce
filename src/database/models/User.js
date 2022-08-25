@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
      static associate(models) {
+      User.belongsTo(models.Role,{
+        as:"Role",
+        foreignKey:"role_id"
+      });
       User.hasMany(models.Transaction,{
         as:"Buys",
         foreignKey:"buyer_user_id"
@@ -50,10 +54,9 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty:true,
       },
     },
-    is_admin: {
-      type:DataTypes.BOOLEAN,
+    role_id: {
+      type:DataTypes.INTEGER,
       allowNull:false,
-      defaultValue:false,
       validate:{
         notEmpty:true,
       },
