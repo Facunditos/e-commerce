@@ -2,7 +2,7 @@ const express=require('express');
 const router=express.Router();
 const verifyToken=require("../middlewares/verifyToken");
 const isBuyer=require("../middlewares/isBuyer");
-const {validateTransaction}=require("../middlewares/transactionsValidator");
+const validateSetQuantity=require("../middlewares/cartValidator");
 
 const {
     getCart,
@@ -19,9 +19,9 @@ const {
 router.get('/',verifyToken,isBuyer,getCart);
 router.post('/buy',verifyToken,buyCart);
 router.post('/:id',verifyToken,isBuyer,addToCart);
-router.put('/:id',verifyToken,isBuyer,setQuantity);
-router.put('/:id/increse',verifyToken,increaseQuantity);
-router.put('/:id/decrese',verifyToken,decreseQuantity);
-router.delete("/:id",verifyToken,removeFromCart);
+router.put('/:id',verifyToken,isBuyer,validateSetQuantity,setQuantity);
+router.put('/:id/increase',verifyToken,isBuyer,increaseQuantity);
+router.put('/:id/decrease',verifyToken,isBuyer,decreseQuantity);
+router.delete("/:id",verifyToken,isBuyer,removeFromCart);
 
 module.exports=router

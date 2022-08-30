@@ -1,6 +1,6 @@
 const express=require('express');
 const router=express.Router();
-const {validateRegister,validateLogin}=require("../middlewares/authValidator")
+const {validateRegister,validateLogin}=require("../middlewares/authValidator");
 
 const {
     registerUser,
