@@ -31,14 +31,14 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false,
       validate:{
-        notEmpty:true,
+        isInt:true,
       },
     },
     worth: {
       type:DataTypes.FLOAT(25,2),
       allowNull:false,
       validate:{
-        notEmpty:true,
+        isFloat:true,
       },
     },
     deletedAt: DataTypes.DATE

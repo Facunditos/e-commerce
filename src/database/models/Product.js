@@ -46,28 +46,28 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.FLOAT(25,2),
       allowNull:false,
       validate:{
-        notEmpty:true,
+        isFloat:true,
       },
     },
     seller_user_id: {
       type:DataTypes.INTEGER,
       allowNull:false,
       validate:{
-        notEmpty:true,
+        isInt:true,
       },
     },
     category_id: {
       type:DataTypes.INTEGER,
       allowNull:false,
       validate:{
-        notEmpty:true,
+        isInt:true,
       },
     },
     stock: {
       type:DataTypes.INTEGER,
       allowNull:false,
       validate:{
-        notEmpty:true,
+        isInt:true,
       },
     },
     status: {

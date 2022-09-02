@@ -1,4 +1,5 @@
 require("dotenv").config()
+const { locals } = require("../app");
 const {
     getAllCategories,
     searchCategoriesByName,
@@ -50,44 +51,101 @@ const transactionsController={
     getCart:async(req,res)=>{
         const userId=req.user.id;
         let cart=req.session.carts[userId];
+        /* Hay que testear si el carro existe o está vacío, ya sea porque: 
+            (a) nunca se creó - cart=undefined -. En este caso no existe; 
+            (b) se creó pero se eliminaron los productos que habían sído agregados - cart={} -. En este caso está vacío */
+        if (!cart) return res.status(400).json({
+            status:400,
+            message:'The cart does not exits' 
+        });
+        //Se convierte el objeto en un array que contiene por cada elemento los productos agregados al carro
         cart=Object.values(cart);
-        if (cart.length==0) {
-            return res.status(404).json({
-                status:200,
-                message:'The cart is empty',
-            }); 
-        } else {
-            return res.status(200).json({
-                status:200,
-                cart,
-            }); 
-        };
+        if (cart.length==0) return res.status(400).json({
+            status:200,
+            message:'The cart is empty' 
+        });
+        cart.sort((a,b)=>{
+            const difference=a.time-b.time;
+            switch(true) {
+                case difference>0:
+                    return 1;
+                case difference==0:
+                    return 0;
+                case difference<0:
+                    return -1
+            }
+        });
+        const cartWorth=cart.reduce((acc,product)=>{
+            return acc+product.price*product.quantity;
+        },0);
+        const editedCart=cart.map((product)=>{
+            return {
+                id:product.id,
+                image:product.image,
+                name:product.name,
+                price:new Intl.NumberFormat(undefined,{
+                    style:"currency",
+                    currency:"ARS",
+                    minimumFractionDigits:2,
+                    maximumFractionDigits:2,
+                }).format(product.price),
+                quantity:new Intl.NumberFormat().format(product.quantity)
+            };
+        });
+        const editedCartWorth=new Intl.NumberFormat(undefined,{
+            style:"currency",
+            currency:"ARS",
+            minimumFractionDigits:2,
+            maximumFractionDigits:2,
+        }).format(cartWorth);
+        return res.status(200).json({
+            status:200,
+            cart:editedCart,
+            worth:editedCartWorth,
+        });
     },
     buyCart:async(req,res)=>{
-        const {user}=req;
+        const userId=req.user.id;
+        const cart=req.session.carts[userId];
+        if (!cart) return res.status(400).json({
+            status:400,
+            message:'The cart is empty' 
+            });
+        const productsOnCart = Object.values(cart); 
+        const cartWorth = productsOnCart.reduce((acc, product) => {
+            return acc + product.price * product.quantity;
+        }, 0);
+        const body={
+            buyer_user_id:userId,
+            cartWorth
+        };    
         try {
-            const items = Object.values(req.session.cart); //get items as array
-            const totalPrice = items.reduce((acc, item) => {
-                return acc + 1 * item.quantity;
-            }, 0);
-            const body={
-                buyer_user_id:user.id,
-                totalPrice
+            let transaction = await createTransaction(body);
+            for (const product of productsOnCart) {
+                await transactionAddProduct(transaction,product)
             };
-            console.log(body);
-            const transaction = await createTransaction(body);
-            for (const item of items) {
-                await transactionAddProduct(transaction,item)
+            req.session.carts[userId]= {};
+            transaction=await findTransactionByPk(transaction.id);
+            transaction.worth=new Intl.NumberFormat(undefined,{
+                style:"currency",
+                currency:"ARS",
+                minimumFractionDigits:2,
+                maximumFractionDigits:2,
+            }).format(transaction.worth);
+            for (const detail of transaction.Details) {
+                detail.price=new Intl.NumberFormat(undefined,{
+                    style:"currency",
+                    currency:"ARS",
+                    minimumFractionDigits:2,
+                    maximumFractionDigits:2,
+                }).format(detail.price);
+                detail.quantity=new Intl.NumberFormat().format(detail.quantity)
             }
-    
-            req.session.cart = {};
-    
             res.status(201).json({
                 status:201,
                 message:'Transaction created',
-                transaction
+                transaction,
             });
-            
         } catch(error) {
             console.log(error)
             res.status(500).json({
@@ -100,9 +158,10 @@ const transactionsController={
     addToCart:async(req,res)=>{
         const productId=req.params.id;
         const userId=req.user.id;
-        //En el caso que el usuario agregue por primera vez un producto a su carro, primero creamos el carro del usuario añadiéndolo al objeto que contiene la totalidad de los carros, el carro del usuario está representado por el id del usuario.
+        //En el caso que el usuario agregue por primera vez undefined producto a su carro, primero creamos el carro del usuario añadiéndolo al objeto que contiene la totalidad de los carros, el carro del usuario está representado por el id del usuario.
         req.session.carts[userId]=req.session.carts[userId]||{};
-        const cart=req.session.carts[userId];
+        let cart=req.session.carts[userId];
+        console.log("eliminado producto"+productId,cart);
         try{
             const product=await findProductByPk(productId);
             if (!product) return res.status(404).json({
@@ -118,48 +177,73 @@ const transactionsController={
                 status:400,
                 message:'The product already exists in your cart'
             });
-            // Este código comentado se importó de MercadoLiebre. En mi desarollo no sirve porque este método es consumido únicamente para implentar la funcionalidad de agregar una unidad de un nuevo producto al carrito, para modificar las unidades del producto sumado, se utilizadn otros métodos
-            /* if (!req.session.cart[product.id]) {
-            req.session.cart[product.id] = {
-                id: product.id,
-                name: product.name,
-                image: product.image,
-                price: product.image_url,
-                quantity: 0,
-            };
-            }
-            req.session.cart[product.id].quantity++; */
 
-            //Al objeto req.session.cart se le agrega una propiedad que tiene como clave el id del nuevo producto sumado al carrito. El valor de la propiedad es un objeto que informa id, url de la imagen, nombre y cantidad de este producto. La cantidad refiere a la unidad sumada al carro, no al stock del producto.  
+            //Al objeto req.session.cart se le agrega una propiedad que tiene como clave el id del nuevo producto sumado al carrito. El valor de la propiedad es undefined objeto que informa id, url de la imagen, nombre y cantidad de este producto. La cantidad refiere a la unidad sumada al carro, no al stock del producto.  
             cart[product.id] = {
                 id: product.id,
                 image: product.image_url,
                 name: product.name,
                 price: product.price,
                 quantity: 1,
+                time:Date.now()
             };
             //Por ser adquirida una unidad del producto, corresponde ajustar su stock, y en el caso que el stock ajustado sea igual a cero, debiera también cambiarse el atributo "status" de activo a inactivo. 
             product.stock--;
             if (product.stock==0) product.status='inactive';
             await updateProduct(product,product.id);
+            //Convierto el objeto que representa al carro en un array
+            cart=Object.values(cart);
+            cart.sort((a,b)=>{
+                const difference=a.time-b.time;
+                switch(true) {
+                    case difference>0:
+                        return 1;
+                    case difference==0:
+                        return 0;
+                    case difference<0:
+                        return -1
+                }
+            });
+            //Aplico el método reduce para conocer el valor del carro
+            const cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            //Cada producto añadido al carro tienen un precio y una cantidad cuyo datos son de tipo numérico. Al querer editar el formato de número para separarlo por miles y/o agregarle el símbolo de la moneda, inexorablemente, se convierte el número en un string, y como el carro de session no debe almacenar números como string, debo crear una nueva variable que contenga al carro pero con los campos de números editados. 
+            const editedCart=cart.map((product)=>{
+                return {
+                    id:product.id,
+                    image:product.image,
+                    name:product.name,
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+            });
+
+            //Edito el número que representa al valor del carro.
+            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
-                message:'Product added to cart',
-                cart
-            });  
+                cart:editedCart,
+                worth:editedCartWorth,
+            });
         } catch(error) {
             console.log(error)
             return res.status(500).json({
                 status:500,
                 message:'Server error'
             })
-        }
+        };
     },
     setQuantity:async(req,res)=>{
         const productId=req.params.id;
         const requestedQuantity=req.body.quantity;
         const userId=req.user.id;
-        const cart=req.session.carts[userId];
+        let cart=req.session.carts[userId];
         try{
             //No se evalúa si el producto está activo porque el ususario podría estar devolviendo unidades del producto, con lo cual, debería permitirse la reposición del stock, sí se evalúa que las unidades requeridas no sean superiores a las unidades en stock mas las unidades ya sumadas al carro. 
             const product=await findProductByPk(productId);
@@ -190,24 +274,53 @@ const transactionsController={
                 product.status='active'
             }
             await updateProduct(product,product.id);
+            cart=Object.values(cart);
+            cart.sort((a,b)=>{
+                const difference=a.time-b.time;
+                switch(true) {
+                    case difference>0:
+                        return 1;
+                    case difference==0:
+                        return 0;
+                    case difference<0:
+                        return -1
+                }
+            });
+            const cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            const editedCart=cart.map((product)=>{
+                return {
+                    id:product.id,
+                    image:product.image,
+                    name:product.name,
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+            });
+            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
-                message:'Cart updated',
-                cart
-                
-            });  
+                cart:editedCart,
+                worth:editedCartWorth,
+            });
         } catch(error) {
             console.log(error)
             return res.status(500).json({
                 status:500,
                 message:'Server error'
             })
-        }
+        };
     },
     increaseQuantity:async(req,res)=>{
         const productId=req.params.id;
         const userId=req.user.id;
-        const cart=req.session.carts[userId];
+        let cart=req.session.carts[userId];
         try{
             const product=await findProductByPk(productId);
             if (!product) return res.status(400).json({
@@ -231,10 +344,40 @@ const transactionsController={
             product.stock--;
             if (product.stock==0) product.status='inactive';
             await updateProduct(product,product.id);
+            cart=Object.values(cart);
+            cart.sort((a,b)=>{
+                const difference=a.time-b.time;
+                switch(true) {
+                    case difference>0:
+                        return 1;
+                    case difference==0:
+                        return 0;
+                    case difference<0:
+                        return -1
+                }
+            });
+            const cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            const editedCart=cart.map((product)=>{
+                return {
+                    id:product.id,
+                    image:product.image,
+                    name:product.name,
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+            });
+            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
-                status:'200',
-                message:'Cart updated',
-                cart
+                status:200,
+                cart:editedCart,
+                worth:editedCartWorth,
             });
         } catch(error) {
             console.log(error)
@@ -242,13 +385,12 @@ const transactionsController={
                 status:500,
                 message:'Server error'
             })
-        }
+        };
     },
     decreseQuantity:async(req,res)=>{
         const productId=req.params.id;
         const userId=req.user.id;
-        console.log(userId);
-        const cart=req.session.carts[userId]
+        let cart=req.session.carts[userId]
         try{
             const product=await findProductByPk(productId);
             if (!product) return res.status(404).json({
@@ -272,23 +414,53 @@ const transactionsController={
             product.stock++;
             if (product.stock==1) product.status="active";
             await updateProduct(product,product.id);
+            cart=Object.values(cart);
+            cart.sort((a,b)=>{
+                const difference=a.time-b.time;
+                switch(true) {
+                    case difference>0:
+                        return 1;
+                    case difference==0:
+                        return 0;
+                    case difference<0:
+                        return -1
+                }
+            });
+            const cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            const editedCart=cart.map((product)=>{
+                return {
+                    id:product.id,
+                    image:product.image,
+                    name:product.name,
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+            });
+            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
-                message:'Cart updated',
-                cart,
-            });  
+                cart:editedCart,
+                worth:editedCartWorth,
+            });
         } catch(error) {
             console.log(error)
             return res.status(500).json({
                 status:500,
                 message:'Server error'
             })
-        }
+        };
     },
     removeFromCart:async(req,res)=>{
         const productId=req.params.id;
         const userId=req.user.id;
-        const cart=req.session.carts[userId]
+        let cart=req.session.carts[userId]
         try{
             const product=await findProductByPk(productId);
             if (!product) return res.status(404).json({
@@ -299,27 +471,60 @@ const transactionsController={
                 status:400,
                 message:'The product does not exists in your cart' 
             });
-            const productOnCart=cart[productId];
+            let productOnCart=cart[productId];
             if (!productOnCart) return res.status(400).json({
                 status:400,
                 message:`The product does not exists in your cart` 
             });
+            cart[productId]=undefined;
             product.stock+=productOnCart.quantity;
             if (product.stock==productOnCart.quantity) product.status="active";
             await updateProduct(product,product.id)
-            cart[productId]=undefined;
+            cart=Object.values(cart);
+            cart.sort((a,b)=>{
+                const difference=a.time-b.time;
+                switch(true) {
+                    case difference>0:
+                        return 1;
+                    case difference==0:
+                        return 0;
+                    case difference<0:
+                        return -1
+                }
+            });
+            const cartWorth=cart.reduce((acc,product)=>{
+                if (!product) return acc;
+                return acc+product.price*product.quantity;
+            },0);
+            const editedCart=[];
+            cart.map((product)=>{
+                if (product)
+                return editedCart.push({
+                    id:product.id,
+                    image:product.image,
+                    name:product.name,
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                });
+            });
+            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
-                message:'Cart updated',
-                cart,
-            });  
+                cart:editedCart.length>0?editedCart:"The cart is empty",
+                worth:cartWorth>0?editedCartWorth:undefined,
+            });
         } catch(error) {
             console.log(error)
             return res.status(500).json({
                 status:500,
                 message:'Server error'
             })
-        }
+        };
     }
 };
 

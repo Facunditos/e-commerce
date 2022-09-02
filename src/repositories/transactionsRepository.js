@@ -1,4 +1,3 @@
-const { body } = require("express-validator");
 const {Transaction}=require("../database/models/index");
 
 const transactionsRepository={
@@ -38,6 +37,7 @@ const transactionsRepository={
     createTransaction:async(body)=>{
         let transaction=await Transaction.create({
             buyer_user_id:body.buyer_user_id,
+            worth:body.cartWorth,
         });
         transaction=await Transaction.findByPk(transaction.id,{
             include:[
@@ -72,11 +72,11 @@ const transactionsRepository={
             }
         });
     },
-    transactionAddProduct:async(transaction,item)=>{
-        return await transaction.addProduct(item.id,{
+    transactionAddProduct:async(transaction,product)=>{
+        return await transaction.addProduct(product.id,{
             through:{
-                price:item.price,
-                quantity:item.quantity
+                price:product.price,
+                quantity:product.quantity
             }
         });
     }
