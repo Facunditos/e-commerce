@@ -2,25 +2,21 @@ const {Transaction}=require("../database/models/index");
 
 const transactionsRepository={
     getAllTransactions:async()=>{
-        const transactions=await Transaction.findAll({
-            include:[
-                {association:'Buyer'},
-                {association:'Products'},
-                {association:'Details'},
-            ],
+        const transactions=await Transaction.findAndCountAll({
+            attributes:{exclude:['buyer_user_id','updatedAt','deletedAt']},
+            order:[['createdAt','DESC']],
+            limit:5,
+            offset:5
         });
         return transactions
     },
     getAllTransactionsByBuyer:async(buyer_user_id)=>{
-        const transactions=await Transaction.findAll({
+        const transactions=await Transaction.findAndCountAll({
             where:{
                 buyer_user_id
             },
-            include:[
-                {association:'Buyer'},
-                {association:'Products'},
-                {association:'Details'},
-            ],
+            attributes:{exclude:['buyer_user_id','updatedAt','deletedAt']},
+            order:[['createdAt','DESC']],
         });
         return transactions
     },
@@ -28,7 +24,6 @@ const transactionsRepository={
         const transaction=await Transaction.findByPk(id,{
             include:[
                 {association:'Buyer'},
-                {association:'Details'},
                 {association:'Products'},
             ],
         });
@@ -42,7 +37,6 @@ const transactionsRepository={
         transaction=await Transaction.findByPk(transaction.id,{
             include:[
                 {association:'Buyer'},
-                {association:'Details'},
                 {association:'Products'},
             ],
         });
@@ -59,7 +53,6 @@ const transactionsRepository={
         const transaction=await Transaction.findByPk(transaction.id,{
             include:[
                 {association:'Buyer'},
-                {association:'Details'},
                 {association:'Products'},
             ],
         });

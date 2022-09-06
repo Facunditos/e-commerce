@@ -20,10 +20,6 @@ module.exports = (sequelize, DataTypes) => {
         as:"Buyer",
         foreignKey:"buyer_user_id"
       });
-      Transaction.hasMany(models.TransactionProduct,{
-        as:"Details",
-        foreignKey:"transaction_id"
-      });
     }
   }
   Transaction.init({

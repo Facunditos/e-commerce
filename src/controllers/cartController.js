@@ -164,6 +164,7 @@ const transactionsController={
         console.log("eliminado producto"+productId,cart);
         try{
             const product=await findProductByPk(productId);
+            console.log("el tipo de dato de product.price es ",typeof product.price);
             if (!product) return res.status(404).json({
                 status:404,
                 message:'Product not found'
@@ -178,7 +179,7 @@ const transactionsController={
                 message:'The product already exists in your cart'
             });
 
-            //Al objeto req.session.cart se le agrega una propiedad que tiene como clave el id del nuevo producto sumado al carrito. El valor de la propiedad es undefined objeto que informa id, url de la imagen, nombre y cantidad de este producto. La cantidad refiere a la unidad sumada al carro, no al stock del producto.  
+            //Al objeto req.session.cart se le agrega una propiedad que tiene como clave el id del nuevo producto sumado al carrito. El valor de la propiedad es un objeto que informa, sobre este producto, el id, la url de su imagen, el nombre, la cantidad y el momento en que se suma al carro. Aclaraciones: (i) la cantidad refiere a la unidad sumada al carro, no al stock del producto; (ii) se captura el momento en que se suma al carro para, posteriormente, poder ordenar el carro -ver método sort()-.
             cart[product.id] = {
                 id: product.id,
                 image: product.image_url,
@@ -193,7 +194,34 @@ const transactionsController={
             await updateProduct(product,product.id);
             //Convierto el objeto que representa al carro en un array
             cart=Object.values(cart);
-            cart.sort((a,b)=>{
+            //Aplico el método reduce para conocer el valor del carro
+            let cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            //Edito el número que representa al valor del carro.
+            cartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
+            //Cada producto añadido al carro tienen un precio y una cantidad cuyos datos son de tipo numérico. Al querer editar el formato de número para separarlo por miles y/o agregarle el símbolo de la moneda peso, inexorablemente, se convierte el número en un string, y como el carro de session no debe almacenar números como string, debo crear una nueva variable que contenga al carro pero con los campos de números editados conforme lo expuesto recientemente. 
+            const editedCart=cart.map((product)=>{
+                const editedProduct= {
+                    ...product,
+                    subtotal:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price*product.quantity),
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+                return editedProduct
+            });
+            //Ordeno el carro según el momento en que cada producto fue añadido 
+            editedCart.sort((a,b)=>{
                 const difference=a.time-b.time;
                 switch(true) {
                     case difference>0:
@@ -204,32 +232,10 @@ const transactionsController={
                         return -1
                 }
             });
-            //Aplico el método reduce para conocer el valor del carro
-            const cartWorth=cart.reduce((acc,product)=>{
-                return acc+product.price*product.quantity;
-            },0);
-            //Cada producto añadido al carro tienen un precio y una cantidad cuyo datos son de tipo numérico. Al querer editar el formato de número para separarlo por miles y/o agregarle el símbolo de la moneda, inexorablemente, se convierte el número en un string, y como el carro de session no debe almacenar números como string, debo crear una nueva variable que contenga al carro pero con los campos de números editados. 
-            const editedCart=cart.map((product)=>{
-                return {
-                    id:product.id,
-                    image:product.image,
-                    name:product.name,
-                    price:new Intl.NumberFormat(undefined,{
-                        style:"currency",
-                        currency:"ARS",
-                        minimumFractionDigits:2,
-                        maximumFractionDigits:2,
-                    }).format(product.price),
-                    quantity:new Intl.NumberFormat().format(product.quantity)
-                };
-            });
-
-            //Edito el número que representa al valor del carro.
-            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
-                status:200,
+                status:201,
                 cart:editedCart,
-                worth:editedCartWorth,
+                worth:cartWorth,
             });
         } catch(error) {
             console.log(error)
@@ -275,7 +281,30 @@ const transactionsController={
             }
             await updateProduct(product,product.id);
             cart=Object.values(cart);
-            cart.sort((a,b)=>{
+            let cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            cartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
+            const editedCart=cart.map((product)=>{
+                const editedProduct= {
+                    ...product,
+                    subtotal:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price*product.quantity),
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+                return editedProduct
+            });
+            editedCart.sort((a,b)=>{
                 const difference=a.time-b.time;
                 switch(true) {
                     case difference>0:
@@ -286,28 +315,10 @@ const transactionsController={
                         return -1
                 }
             });
-            const cartWorth=cart.reduce((acc,product)=>{
-                return acc+product.price*product.quantity;
-            },0);
-            const editedCart=cart.map((product)=>{
-                return {
-                    id:product.id,
-                    image:product.image,
-                    name:product.name,
-                    price:new Intl.NumberFormat(undefined,{
-                        style:"currency",
-                        currency:"ARS",
-                        minimumFractionDigits:2,
-                        maximumFractionDigits:2,
-                    }).format(product.price),
-                    quantity:new Intl.NumberFormat().format(product.quantity)
-                };
-            });
-            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
                 cart:editedCart,
-                worth:editedCartWorth,
+                worth:cartWorth,
             });
         } catch(error) {
             console.log(error)
@@ -345,7 +356,30 @@ const transactionsController={
             if (product.stock==0) product.status='inactive';
             await updateProduct(product,product.id);
             cart=Object.values(cart);
-            cart.sort((a,b)=>{
+            let cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            cartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
+            const editedCart=cart.map((product)=>{
+                const editedProduct= {
+                    ...product,
+                    subtotal:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price*product.quantity),
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+                return editedProduct
+            });
+            editedCart.sort((a,b)=>{
                 const difference=a.time-b.time;
                 switch(true) {
                     case difference>0:
@@ -356,28 +390,10 @@ const transactionsController={
                         return -1
                 }
             });
-            const cartWorth=cart.reduce((acc,product)=>{
-                return acc+product.price*product.quantity;
-            },0);
-            const editedCart=cart.map((product)=>{
-                return {
-                    id:product.id,
-                    image:product.image,
-                    name:product.name,
-                    price:new Intl.NumberFormat(undefined,{
-                        style:"currency",
-                        currency:"ARS",
-                        minimumFractionDigits:2,
-                        maximumFractionDigits:2,
-                    }).format(product.price),
-                    quantity:new Intl.NumberFormat().format(product.quantity)
-                };
-            });
-            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
                 cart:editedCart,
-                worth:editedCartWorth,
+                worth:cartWorth,
             });
         } catch(error) {
             console.log(error)
@@ -415,7 +431,30 @@ const transactionsController={
             if (product.stock==1) product.status="active";
             await updateProduct(product,product.id);
             cart=Object.values(cart);
-            cart.sort((a,b)=>{
+            let cartWorth=cart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            cartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
+            const editedCart=cart.map((product)=>{
+                const editedProduct= {
+                    ...product,
+                    subtotal:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price*product.quantity),
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+                return editedProduct
+            });
+            editedCart.sort((a,b)=>{
                 const difference=a.time-b.time;
                 switch(true) {
                     case difference>0:
@@ -426,28 +465,10 @@ const transactionsController={
                         return -1
                 }
             });
-            const cartWorth=cart.reduce((acc,product)=>{
-                return acc+product.price*product.quantity;
-            },0);
-            const editedCart=cart.map((product)=>{
-                return {
-                    id:product.id,
-                    image:product.image,
-                    name:product.name,
-                    price:new Intl.NumberFormat(undefined,{
-                        style:"currency",
-                        currency:"ARS",
-                        minimumFractionDigits:2,
-                        maximumFractionDigits:2,
-                    }).format(product.price),
-                    quantity:new Intl.NumberFormat().format(product.quantity)
-                };
-            });
-            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
                 cart:editedCart,
-                worth:editedCartWorth,
+                worth:cartWorth,
             });
         } catch(error) {
             console.log(error)
@@ -476,12 +497,43 @@ const transactionsController={
                 status:400,
                 message:`The product does not exists in your cart` 
             });
+            //Para quintar el producto del carro, se declara "undefined" el valor de la propiedad que representa a este producto, ya que el objeto global que representa al carro no incluye una propiedad cuyo valor no esté definido. 
             cart[productId]=undefined;
+            console.log("cartObject",cart);
             product.stock+=productOnCart.quantity;
             if (product.stock==productOnCart.quantity) product.status="active";
             await updateProduct(product,product.id)
             cart=Object.values(cart);
-            cart.sort((a,b)=>{
+            let editedCart=cart.filter((product)=>{
+                return product
+            });
+            console.log("cartEdited",editedCart);
+            const cartWorth=editedCart.reduce((acc,product)=>{
+                return acc+product.price*product.quantity;
+            },0);
+            
+            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
+            console.log("cartWorth",cartWorth);
+            editedCart=editedCart.map((product)=>{
+                const editedProduct= {
+                    ...product,
+                    subtotal:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price*product.quantity),
+                    price:new Intl.NumberFormat(undefined,{
+                        style:"currency",
+                        currency:"ARS",
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2,
+                    }).format(product.price),
+                    quantity:new Intl.NumberFormat().format(product.quantity)
+                };
+                return editedProduct
+            });
+            editedCart.sort((a,b)=>{
                 const difference=a.time-b.time;
                 switch(true) {
                     case difference>0:
@@ -492,27 +544,6 @@ const transactionsController={
                         return -1
                 }
             });
-            const cartWorth=cart.reduce((acc,product)=>{
-                if (!product) return acc;
-                return acc+product.price*product.quantity;
-            },0);
-            const editedCart=[];
-            cart.map((product)=>{
-                if (product)
-                return editedCart.push({
-                    id:product.id,
-                    image:product.image,
-                    name:product.name,
-                    price:new Intl.NumberFormat(undefined,{
-                        style:"currency",
-                        currency:"ARS",
-                        minimumFractionDigits:2,
-                        maximumFractionDigits:2,
-                    }).format(product.price),
-                    quantity:new Intl.NumberFormat().format(product.quantity)
-                });
-            });
-            const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
             return res.status(200).json({
                 status:200,
                 cart:editedCart.length>0?editedCart:"The cart is empty",

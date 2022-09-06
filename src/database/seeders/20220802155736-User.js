@@ -35,7 +35,7 @@ const usersList=
     .fill({
         first_name:"Admin",
         last_name:"Admin",
-        email:"ecommerce1287@gmai.com",
+        email:"ecommerce1287@gmail.com",
         password:createHashPassword('Admin'),
         role_id:1,
         image_url:"https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png",

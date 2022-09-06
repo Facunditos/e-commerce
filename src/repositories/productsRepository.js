@@ -30,7 +30,6 @@ const productsRepository={
         const product=await Product.findByPk(id,{
             include:[
                 {association:"Seller"},
-                {association:'Sales'},
                 {association:'Transactions'},
                 {association:'Category'},
             ],
@@ -77,7 +76,6 @@ const productsRepository={
         product=await Product.findByPk(id,{
             include:[
                 {association:'Seller'},
-                {association:'Sales'},
                 {association:'Transactions'},
                 {association:'Category'},
             ],

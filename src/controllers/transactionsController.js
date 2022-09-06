@@ -48,23 +48,26 @@ const {
 const transactionsController={
     getTransactionsList:async(req,res)=>{
         const {user}=req;
-    
         try{
-            // Se construye un objeto JSON con tres propiedades, en todos los casos el valor es un array, y a su vez existe correspondencia entre los respectivos índices de estas tres listas. 
+            // Se construye un objeto con tres propiedades, en todos los casos el valor es un array, y a su vez existe correspondencia entre los respectivos índices de estas tres listas. 
             // 1- la primera propiedad  es el array de transacciones que contiene tanto objetos como transacciones existan, a su vez se incluyen todas las asociaciones del modelo Transaction.
-            let transactions=await getAllTransactions();
-            return res.render("transactions",{transactions})
+            let transactions;
+            /* return res.render("transactions",{transactions}); */
             if (user.Role.name=="Admin") {
                 transactions=await getAllTransactions();
             } else {
                transactions=await getAllTransactionsByBuyer(user.id)
-            }
-            ;
+            };
+            console.log(transactions.Transactions);
+            return res.json(transactions)
+            transactions=transactions.rows
             if (transactions.length===0) return res.status(404).json({
                 status:404,
                 message:'There is no transaction'
             });
-
+            for (const transaction of transactions) {
+                console.log(transaction.createdAt);
+            }
             // 2- la segunda propiedad es el array de usuarios que actúan como vendedores en las transacciones listadas, como en una transacción puede incluirse más de un producto, en cada transacción puede involucrearse más de un usuario como vendedor, por lo tanto, los usuarios vendedores son agrupados por transación en sublistas,
                 // 2-A Primero se construye un listado con los id de los usuarios vendedores, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene el id del usuario vendedor. A su vez este listado está integrado por sublistas, cada una de estas sublistas se corresponde con una transacción en particular, por lo tanto, en cada sublista se incluye los id de los usuarios vendedores involucrados en una transacción en particular
             let sellers_idGroupedByTransaction=[];
@@ -86,7 +89,6 @@ const transactionsController={
                  return sellersGroupedByTransaction.push(sellersOneTransaction);
                 })
             );
-            console.log(sellersGroupedByTransaction[0]);
             // 3- la tercera propiedad es el array con las categorías de los productos involucrados en las transacciones listadas, como en una transacción puede incluirse más de un producto, en cada transación puede corresponder más de una categoría de producto, por lo tanto, las categorías son agrupados por transación en sublistas
             let productsCategories_idGroupedByTransaction=[];
                 // 3-A Primero se construye un listado con los id de las categorías de los productos, los respectivos id son buscados en la relación entre el modelo Transaction y el modelo Product, este último modelo contiene el id de la categoría del producto. A su vez este listado está integrado por sublistas, cada una de estas sublistas se corresponde con una transacción en particular, por lo tanto, en cada sublista se incluye los id de las categorías de los productos involucrados en una transacción en particular.
@@ -107,7 +109,6 @@ const transactionsController={
                     return productsCategoriesGroupedByTransaction.push(categoriesProductsOneTransaction);
                 })
             );
-            
             return res.status(200).json({
                 status:200,
                 transactions,
@@ -128,7 +129,7 @@ const transactionsController={
     getTransactionDetail:async (req,res)=>{
         let {id}=req.params;
         try {
-            // Se construye un objeto JSON con tres propiedades: transction, sellers y categories. 
+            // Se construye un objeto con tres propiedades: transction, sellers y categories. 
             // 1- la primera propiedad es el objeto que representa a una transacción, a su vez se incluyen todas las asociaciones del modelo Transaction, en particular, interesa mencionar la asociación con el modelo Product, que permite obtener el conjunto de productos involucrados en la transacción.
             let transaction=await findTransactionByPk(id);
             if (!transaction) return res.status(404).json({
