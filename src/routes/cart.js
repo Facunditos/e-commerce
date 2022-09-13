@@ -1,7 +1,7 @@
 const express=require('express');
 const router=express.Router();
 const verifyToken=require("../middlewares/verifyToken");
-const isBuyer=require("../middlewares/isBuyer");
+const verifyIsBuyer=require("../middlewares/verifyIsBuyer");
 const validateSetQuantity=require("../middlewares/cartValidator");
 
 const {
@@ -11,17 +11,19 @@ const {
     setQuantity,
     increaseQuantity,
     decreseQuantity,
-    removeFromCart
+    removeFromCart,
+    emptyCart
 }=require('../controllers/cartController');
 
 
 
-router.get('/',verifyToken,isBuyer,getCart);
+router.get('/',verifyToken,getCart);
 router.post('/buy',verifyToken,buyCart);
-router.post('/:id',verifyToken,isBuyer,addToCart);
-router.put('/:id',verifyToken,isBuyer,validateSetQuantity,setQuantity);
-router.put('/:id/increase',verifyToken,isBuyer,increaseQuantity);
-router.put('/:id/decrease',verifyToken,isBuyer,decreseQuantity);
-router.delete("/:id",verifyToken,isBuyer,removeFromCart);
+router.post('/:id',verifyToken,verifyIsBuyer,addToCart);
+router.put('/:id',verifyToken,verifyIsBuyer,validateSetQuantity,setQuantity);
+router.put('/:id/increase',verifyToken,verifyIsBuyer,increaseQuantity);
+router.put('/:id/decrease',verifyToken,verifyIsBuyer,decreseQuantity);
+router.delete("/:id",verifyToken,verifyIsBuyer,removeFromCart);
+router.delete("/",verifyToken,verifyIsBuyer,emptyCart);
 
 module.exports=router

@@ -1,12 +1,12 @@
 const {Transaction}=require("../database/models/index");
 
 const transactionsRepository={
-    getAllTransactions:async()=>{
+    getAllTransactions:async(offset)=>{
         const transactions=await Transaction.findAndCountAll({
-            attributes:{exclude:['buyer_user_id','updatedAt','deletedAt']},
+            attributes:["id","worth",["createdAt","purchase date"]],
             order:[['createdAt','DESC']],
             limit:5,
-            offset:5
+            offset
         });
         return transactions
     },
@@ -15,16 +15,33 @@ const transactionsRepository={
             where:{
                 buyer_user_id
             },
-            attributes:{exclude:['buyer_user_id','updatedAt','deletedAt']},
+            attributes:["id","worth",["createdAt","purchase date"]],
             order:[['createdAt','DESC']],
         });
         return transactions
     },
     findTransactionByPk:async(id)=>{
         const transaction=await Transaction.findByPk(id,{
+            attributes:['worth','createdAt'],
             include:[
-                {association:'Buyer'},
-                {association:'Products'},
+                {
+                    association:'Buyer',
+                    attributes:['first_name','last_name','email'],
+                },
+                {
+                    association:'Products',
+                    attributes:['id','price','name'],
+                    include:[
+                        {
+                            association:"Seller",
+                            attributes:['first_name','last_name','email'],
+                        },
+                        {
+                            association:"Category",
+                            attributes:['name'],
+                        }
+                    ]
+                },
             ],
         });
         return transaction

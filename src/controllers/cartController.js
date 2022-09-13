@@ -1,14 +1,4 @@
-require("dotenv").config()
-const { locals } = require("../app");
-const {
-    getAllCategories,
-    searchCategoriesByName,
-    findCategoryByPk,
-    findCategoryByName,
-    createCategory,
-    updateCategory,
-    destroyCategory
-}=require("../repositories/categoriesRepository");
+require("dotenv").config();
 
 
 const {
@@ -20,15 +10,6 @@ const {
 }=require("../repositories/productsRepository");
 
 const {
-    getAllTransactionsDetails,
-    findTransactionDetailByPk,
-    findTransactionDetailsByTransaction,
-    createTransactionDetail,
-    updateTransactionDetail,
-    destroyTransactionDetail
-}=require("../repositories/transactionDetailsRepository");
-
-const {
     getAllTransactions,
     getAllTransactionsByBuyer,
     findTransactionByPk,
@@ -38,14 +19,6 @@ const {
     transactionAddProduct
 }=require("../repositories/transactionsRepository");
 
-const {
-    getAllUsers,
-    findUserByPk,
-    findUserByEmail,
-    createUser,
-    updateUser,
-    destroyUser
-}=require("../repositories/usersRepository");
 
 const transactionsController={
     getCart:async(req,res)=>{
@@ -481,7 +454,7 @@ const transactionsController={
     removeFromCart:async(req,res)=>{
         const productId=req.params.id;
         const userId=req.user.id;
-        let cart=req.session.carts[userId]
+        let cart=req.session.carts[userId];
         try{
             const product=await findProductByPk(productId);
             if (!product) return res.status(404).json({
@@ -507,7 +480,6 @@ const transactionsController={
             let editedCart=cart.filter((product)=>{
                 return product
             });
-            console.log("cartEdited",editedCart);
             const cartWorth=editedCart.reduce((acc,product)=>{
                 return acc+product.price*product.quantity;
             },0);
@@ -548,6 +520,35 @@ const transactionsController={
                 status:200,
                 cart:editedCart.length>0?editedCart:"The cart is empty",
                 worth:cartWorth>0?editedCartWorth:undefined,
+            });
+        } catch(error) {
+            console.log(error)
+            return res.status(500).json({
+                status:500,
+                message:'Server error'
+            })
+        };
+    },
+    emptyCart:async(req,res)=>{
+        const userId=req.user.id;
+        let cart=req.session.carts[userId];
+        try{
+            if (!cart) return res.status(400).json({
+                status:400,
+                message:'The product does not exists in your cart' 
+            });
+            cart=Object.values(cart);
+            for (const productOnCart of cart) {
+                const product=await findProductByPk(productOnCart.id);
+                if (product.status=="inactive") product.status='active';
+                product.stock+=productOnCart.quantity;
+                await updateProduct(product,product.id)
+            };
+            //Se vacía el carro. 
+            req.session.carts[userId]= {};
+            return res.status(200).json({
+                status:200,
+                message:'The cart is empty'
             });
         } catch(error) {
             console.log(error)

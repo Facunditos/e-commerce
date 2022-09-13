@@ -10,42 +10,6 @@ const {
     destroyCategory
 }=require("../repositories/categoriesRepository");
 
-const {
-    getAllProducts,
-    findProductByPk,
-    createProduct,
-    updateProduct,
-    destroyProduct
-}=require("../repositories/productsRepository");
-
-const {
-    getAllTransactionsDetails,
-    findTransactionDetailByPk,
-    findTransactionDetailsByTransaction,
-    createTransactionDetail,
-    updateTransactionDetail,
-    destroyTransactionDetail
-}=require("../repositories/transactionDetailsRepository");
-
-const {
-    getAllTransactions,
-    getAllTransactionsByBuyer,
-    findTransactionByPk,
-    createTransaction,
-    updateTransaction,
-    destroyTransaction
-}=require("../repositories/transactionsRepository");
-
-const {
-    getAllUsers,
-    findUserByPk,
-    findUserByEmail,
-    searchUsersByEmail,
-    createUser,
-    updateUser,
-    destroyUser
-}=require("../repositories/usersRepository");
-
 const categoriesController={
     getCategoriesList:async(req,res)=>{
         try{

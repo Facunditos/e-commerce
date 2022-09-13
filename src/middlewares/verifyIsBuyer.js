@@ -1,4 +1,4 @@
-const isBuyer=(req,res,next)=> {
+const verifyIsBuyer=(req,res,next)=> {
     const {user}=req;
     if (user.Role.name!="Buyer") {
         return res.status(403).json({
@@ -9,4 +9,4 @@ const isBuyer=(req,res,next)=> {
     return next()
 }
 
-module.exports=isBuyer
+module.exports=verifyIsBuyer

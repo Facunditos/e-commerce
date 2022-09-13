@@ -2,41 +2,6 @@ require("dotenv").config();
 
 const {uploadToBucket}=require("../services/AWS_S3");
 const sendWelcomeEmail=require("../services/sendgridEmail");
-const {
-    getAllCategories,
-    searchCategoriesByName,
-    findCategoryByPk,
-    findCategoryByName,
-    createCategory,
-    updateCategory,
-    destroyCategory
-}=require("../repositories/categoriesRepository");
-
-const {
-    getAllProducts,
-    findProductByPk,
-    createProduct,
-    updateProduct,
-    destroyProduct
-}=require("../repositories/productsRepository");
-
-const {
-    getAllTransactionsDetails,
-    findTransactionDetailByPk,
-    findTransactionDetailsByTransaction,
-    createTransactionDetail,
-    updateTransactionDetail,
-    destroyTransactionDetail
-}=require("../repositories/transactionDetailsRepository");
-
-const {
-    getAllTransactions,
-    getAllTransactionsByBuyer,
-    findTransactionByPk,
-    createTransaction,
-    updateTransaction,
-    destroyTransaction
-}=require("../repositories/transactionsRepository");
 
 const {
     getAllUsers,

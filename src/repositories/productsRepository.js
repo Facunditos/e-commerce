@@ -1,14 +1,9 @@
 const {Product,User}=require("../database/models/index");
-const {Op}=require("sequelize")
+const {Op}=require("sequelize");
 const productsRepository={
     getAllProducts:async()=>{
-        const products=await Product.findAll({
-            include:[
-                {association:'Seller'},
-                {association:'Sales'},
-                {association:'Transactions'},
-                {association:'Category'}
-            ],
+        const products=await Product.findAndCountAll({
+            attributes:["name","price"]
         });
         return products
     },
@@ -17,12 +12,14 @@ const productsRepository={
             where:{
                 seller_user_id
             },
-            include:[
-                {association:'Seller'},
-                {association:'Sales'},
-                {association:'Transactions'},
-                {association:'Category'}
-            ],
+        });
+        return products
+    },
+    searchProductsByName:async(name)=>{
+        const products=await Category.findAll({
+            where:{
+                name:{[Op.like]:`%${name}%`}
+            },
         });
         return products
     },
@@ -51,10 +48,8 @@ const productsRepository={
         product=await Product.findByPk(product.id,{
             include:[
                 {association:'Seller'},
-                {association:'Sales'},
                 {association:'Transactions'},
-                {association:'Category'},
-                ,
+                {association:'Category'}
             ],
         });
         return product
@@ -89,6 +84,6 @@ const productsRepository={
             }
         });
     },
-}
+};
 
 module.exports=productsRepository
