@@ -1,9 +1,21 @@
 const {Product,User}=require("../database/models/index");
+const sequelize=require("sequelize");
 const {Op}=require("sequelize");
+
 const productsRepository={
-    getAllProducts:async()=>{
+    getAllProductsOrderByCategoryAndSales:async(offset)=>{
         const products=await Product.findAndCountAll({
-            attributes:["name","price"]
+            attributes:[
+                "id",
+                "name",
+                "price",
+                'image_url',
+                [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'sales'],
+                [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
+            ],
+            order:[sequelize.literal('category'),[sequelize.literal('sales'),'desc']],
+            limit:5,
+            offset
         });
         return products
     },
@@ -15,21 +27,67 @@ const productsRepository={
         });
         return products
     },
-    searchProductsByName:async(name)=>{
-        const products=await Category.findAll({
+    searchProductsByNameAndOrder:async(name,attribute,direction)=>{
+        if (attribute==undefined) attribute='name';
+        if (direction==undefined) direction='asc';
+        const products=await Product.findAll({
             where:{
                 name:{[Op.like]:`%${name}%`}
             },
+            attributes:[
+                "id",
+                "name",
+                "price",
+                'image_url',
+                [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'total sales'],
+                [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
+            ],
+            order:[[attribute,direction]],
+            
         });
         return products
     },
     findProductByPk:async(id)=>{
         const product=await Product.findByPk(id,{
+            attributes:{
+                exclude:['seller_user_id','category_id','createdAt','updatedAt','deletedAt'],
+                include:[
+                    [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),'sales'],
+                ]               
+            },
             include:[
-                {association:"Seller"},
-                {association:'Transactions'},
-                {association:'Category'},
-            ],
+                {
+                    association:'Category',
+                    attributes:['name']
+                },
+                {
+                    association:'Seller',
+                    attributes:['first_name','last_name','email']
+                },
+                {
+                    association:'Transactions',
+                    attributes:[
+                        ['createdAt','sale date'],
+                        [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id AND transaction_product.transaction_id=transactions.id)'),'sales']
+                    ],
+                    include:[
+                        {
+                            association:'Buyer',
+                            attributes:['first_name','last_name','email']
+                        }
+                    ]
+                },
+
+            ]
+        });
+        return product
+    },
+    findProductByName:async(name)=>{
+        const product=await Product.findOne({
+            attributes:['name'],
+            where:{
+                name
+            }
         });
         return product
     },
@@ -68,13 +126,7 @@ const productsRepository={
                 id
             }
         });
-        product=await Product.findByPk(id,{
-            include:[
-                {association:'Seller'},
-                {association:'Transactions'},
-                {association:'Category'},
-            ],
-        });
+        product=await Product.findByPk(id);
         return product
     },
     destroyProduct:async(id)=>{

@@ -42,7 +42,8 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.FLOAT(25,2),
       allowNull:false,
       validate:{
-        isFloat:true,
+        
+        min:0,
       },
     },
     seller_user_id: {
@@ -71,6 +72,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       validate:{
         notEmpty:true,
+        isIn: [['active', 'inactive']], 
       },
     },
     image_url: {

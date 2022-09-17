@@ -16,9 +16,9 @@ const {
 
 
 
-router.get('/',verifyToken,verifyIsAdmin,getCategoriesList);
-router.get('/search',verifyToken,verifyIsAdmin,searchCategoriesByName);
-router.get('/:id',verifyToken,verifyIsAdmin,getCategoryDetail);
+router.get('/',getCategoriesList);
+router.get('/search',searchCategoriesByName);
+router.get('/:id',getCategoryDetail);
 router.post('/',verifyToken,verifyIsAdmin,validateCreate,createCategory);
 router.put('/:id',verifyToken,validateUpdate,updateCategory);
 router.delete('/:id',verifyToken,deleteCategory);

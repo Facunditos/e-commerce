@@ -1,13 +1,16 @@
 require("dotenv").config();
 
 const {
-    getAllProducts,
+    getAllProductsOrderByCategoryAndSales,
+    getAllProductsBySeller,
+    searchProductsByNameAndOrder,
     findProductByPk,
     createProduct,
     updateProduct,
-    destroyProduct
+    destroyProduct,
 }=require("../repositories/productsRepository");
-
+const {uploadToBucket}=require("../services/AWS_S3");
+const path=require("path");
 const productsController={
     getProductsList:async(req,res)=>{
         //El número de página al que se quiere acceder es indicado como query al final de la url.
@@ -20,34 +23,28 @@ const productsController={
             status:400,
             message:"Page does't exist",
         });
-        page=parseInt(page);
         try{
-            //La clave count almacena la cantidad total de registros que integran la tabla de productos. La clase rows almacena el array de products que se quieren mostrar según la query, la cual tiene las propiedades "limit" y "offset". 
-            const {count,rows}=
-            if (rows.length==0) return res.status(404).json({
+            //La clave count almacena la cantidad total de registros que integran la tabla de productos. La clase rows almacena el array de products que se quieren mostrar según la query, la cual tiene incluida las propiedades "limit" y "offset". A su vez, se ordena la búsqueda, primero, según categoría, y luego, según las ventas acumuladas (precio * cantidad) de cada producto.
+            const {count,rows}=await getAllProductsOrderByCategoryAndSales((page-1)*5);
+            if (count==0) return res.status(404).json({
                 status:404,
-                message:"There is no transaction",
+                message:'There is no products'
             });
-            //En base a considerar que se quiere devolver cinco registros, se indica la máxima página que corresponde en base a la cantidad de transacciones encontradas. 
+            //En base a considerar que se quiere devolver cinco registros, se indica la máxima página que corresponde según la cantidad de transacciones encontradas. 
             const maxPage=Math.ceil(count/5);
             if (maxPage<page) return res.status(400).json({
                 status:400,
                 message:"Page does't exist",
             });
-            if (count==0) return res.status(404).json({
-                status:404,
-                message:'There is no transaction'
-            });
             const previousPage=page==1?1:page-1;
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/me/transactions?page=${previousPage}`,
-                nextpage:`/me/transactions?page=${nextPage}`,
-                transactions:rows,
+                previouspage:`/products?page=${previousPage}`,
+                nextpage:`/products?page=${nextPage}`,
+                count,
+                products:rows,
             });
-            //return res.render("transactions",{transactions,sellersGroupedByTransaction,productsCategoriesGroupedByTransaction})
-
         } catch(error) {
             console.log(error);
             return res.status(500).json({
@@ -59,9 +56,22 @@ const productsController={
     },
     searchProductsByName:async(req,res)=>{
         try {
-            // Únicamente el usuario administrador puede buscar categorías por nombre, a su vez, para la búsqueda se hace uso del operador "like", que permite especificar la condición que debiera cumplirse en la búsqued, se hace uso del comodín "%" para evitar búsquedas restrictivas. La condición de búsqueda es especificada como query de la petición. En el resultado de la búsqueda se proporionan los id de los productos abarcados por cada categoría. Con los respectivos id, pueden realizarse las correspondientes peticiones para conocer el detalle de un producto.
-            const {name}=req.query;
-            const products=await searchProductsByName(name);
+            // Para la búsqueda se hace uso del operador "like", que permite especificar la condición que debiera cumplirse para que se arroje un resultado, se hace uso del comodín "%" para evitar búsquedas restrictivas. La condición de búsqueda es especificada como query de la petición. En el resultado de la búsqueda se proporionan los id de los productos abarcados por cada categoría. Con los respectivos id, pueden realizarse las correspondientes peticiones para conocer el detalle de un producto.
+            const {name,orderBy,direction}=req.query;
+        
+            const orderByList=['name','price'];
+            const directionsList=['asc','desc','ASC','DESC']
+            if (orderBy&&!orderByList.includes(orderBy)) {
+                return res.status(400).json({
+                status:400,
+                message:'The products search can only be sorted by name or price'
+                })
+            }
+            if (direction&&!directionsList.includes(direction)) res.status(400).json({
+                status:400,
+                message:'The products search can only be sorted ascendantly or descendingly'
+            });
+            const products=await searchProductsByNameAndOrder(name,orderBy,direction)
             if (products.length!=0) {
                 return res.status(200).json({
                     status:200,
@@ -70,7 +80,7 @@ const productsController={
             } else {
                 return res.status(404).json({
                     status:404,
-                    message:'There are no product with this name'
+                    message:'There are no product with that name'
                 }) 
             }
         } catch(error) {
@@ -106,16 +116,20 @@ const productsController={
         }
     },
     createProduct:async(req,res)=>{
-        const {body}=req;
+        const {body,user,files}=req;
+        body.seller_user_id=user.id;
+        const fileUpload=files.file;
+        const bucket="ecommerce1287";
+        const key=`product-img/product-${Date.now()}${path.extname(fileUpload.name)}`;
+        body.image_url=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${key}`;
+        // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Product", opere la propiedad "defaultValue"
+        if (!body.description) body.description=undefined;
         try{
-            // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Product", opere la propiedad "defaultValue"
-            if (!body.description) {
-                body.description=undefined;
-            }
+            await uploadToBucket(bucket,key,fileUpload);
             const product=await createProduct(body);
             res.status(201).json({
                 status:201,
-                message:'Cstegory created',
+                message:'Product created',
                 product
             })
         }catch(e){
@@ -130,15 +144,9 @@ const productsController={
         const {body}=req;
         const {id}=req.params;
         try{
-            // Se corroborra que exista la categoría sobre la que se aplica la petición PUT
-            const product=await findProductByPk(id);
-            if (!product) return res.status(404).json({
-                status:404,
-                message:'There is no product whit this id'
-            });
             // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Product", opere la propiedad "defaultValue"
             if (!body.description) {
-                body.description="product without description";
+                body.description="B";
             }
             const productUpdated=await updateProduct(body,id);
             res.status(201).json({

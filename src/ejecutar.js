@@ -1,17 +1,22 @@
-const {Transaction}=require("./database/models/index");
+const {Product}=require("./database/models/index");
 
-async function agregarItem() {
+async function agregarProducto() {
     try{
-        const transaction=await Transaction.findByPk(13);
-        const item=await transaction.addProducts([42,43],
-            {through:{
-                price:[12.12,42.78],
-                quantity:[15,22]
-            }}
-        );
-        return console.log(item);
+        const product=await Product.create({
+            name:120,
+            description:'',
+            price:45.20,
+            seller_user_id:2,
+            category_id:3,
+            stock:450,
+            status:'active',
+            image_url:'adasdfadsdf'
+        });
+        return console.log(product);
     } catch(e){console.log(e);}
     
 };
 
-agregarItem()
+agregarProducto();
+
+console.log('lindo día es hoy'+'\nqúe lindo día será mañana');

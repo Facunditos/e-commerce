@@ -13,7 +13,7 @@ const {
 const categoriesController={
     getCategoriesList:async(req,res)=>{
         try{
-            // en esta esta petición, que únicamente la puede realizar el usuario administrador, se trae el listado de todas los categorías, y su vez se consumen las asosiaciones del modelo "Category" con el modelo "Product", a través de esta asociación, puede observase cuáles productos están abarcados en cada categoría. 
+            // en esta esta petición se trae el listado de todas los categorías, y su vez se consumen las asosiaciones del modelo "Category" con el modelo "Product", a través de esta asociación, puede observase cuáles productos están abarcados en cada categoría. 
             const categories = await getAllCategories();
             if (categories.length!=0) {
                 return res.status(200).json({
@@ -37,7 +37,7 @@ const categoriesController={
     },
     searchCategoriesByName:async(req,res)=>{
         try {
-            // Únicamente el usuario administrador puede buscar categorías por nombre, a su vez, para la búsqueda se hace uso del operador "like", que permite especificar la condición que debiera cumplirse en la búsqued, se hace uso del comodín "%" para evitar búsquedas restrictivas. La condición de búsqueda es especificada como query de la petición. En el resultado de la búsqueda se proporionan los id de los productos abarcados por cada categoría. Con los respectivos id, pueden realizarse las correspondientes peticiones para conocer el detalle de un producto.
+            // Para la búsqueda se hace uso del operador "like", que permite especificar la condición que debiera cumplirse para que la búsqueda arroje un resultado, se hace uso del comodín "%" para evitar búsquedas restrictivas. La condición de búsqueda es especificada como query de la petición. En el resultado de la búsqueda se proporionan los id de los productos abarcados por cada categoría. Con los respectivos id, pueden realizarse las correspondientes peticiones para conocer el detalle de un producto.
             const {name}=req.query;
             const categories=await searchCategoriesByName(name);
             if (categories.length!=0) {

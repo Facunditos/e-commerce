@@ -16,9 +16,8 @@ const {
 
 
 
-router.get('/',verifyToken,getProductsList);
-router.get('/search/name',searchProductsByName);
-router.get('/search/category',verifyToken,verifyIsSeller,searchProductsByCategory);
+router.get('/',getProductsList);
+router.get('/search',searchProductsByName);
 router.get('/:id',getProductDetail);
 router.post('/',verifyToken,verifyIsSeller,validateCreate,createProduct);
 router.put('/:id',verifyToken,verifyIsSeller,validateUpdate,updateProduct);

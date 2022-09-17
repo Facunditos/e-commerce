@@ -39,19 +39,15 @@ const transactionsController={
                 count=results.count;
                 rows=results.rows;
             };
-            if (rows.length==0) return res.status(404).json({
+            if (count==0) return res.status(404).json({
                 status:404,
-                message:"There is no transaction",
+                message:'There is no transaction'
             });
-            //En base a considerar que se quiere devolver cinco registros, se indica la máxima página que corresponde en base a la cantidad de transacciones encontradas. 
+            //En base a considerar que se quiere devolver cinco registros, se indica la máxima página que corresponde según la cantidad de transacciones encontradas. 
             const maxPage=Math.ceil(count/5);
             if (maxPage<page) return res.status(400).json({
                 status:400,
                 message:"Page does't exist",
-            });
-            if (count==0) return res.status(404).json({
-                status:404,
-                message:'There is no transaction'
             });
             const previousPage=page==1?1:page-1;
             const nextPage=page==maxPage?page:page+1;
@@ -59,6 +55,7 @@ const transactionsController={
                 status:200,
                 previouspage:`/me/transactions?page=${previousPage}`,
                 nextpage:`/me/transactions?page=${nextPage}`,
+                count,
                 transactions:rows,
             });
             //return res.render("transactions",{transactions,sellersGroupedByTransaction,productsCategoriesGroupedByTransaction})

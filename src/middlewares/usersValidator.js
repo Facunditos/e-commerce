@@ -15,7 +15,7 @@ const validateUpdate = [
         .custom(async function (email,{req}) {
                 if (req.user.email!=req.body.email) {
                     const user=await findUserByEmail(email);
-                if (user) throw new Error('This email already exits');  
+                    if (user) throw new Error('This email already exits');  
                 };
                 return true
         }),

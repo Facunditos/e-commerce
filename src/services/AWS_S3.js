@@ -7,7 +7,6 @@ const s3=new AWS.S3({
     region:process.env.AWS_region
 });
 const uploadToBucket=(bucket,key,file)=>{
-    
     const stream=fs.createReadStream(file.tempFilePath);
     const params={
         Bucket:bucket,
