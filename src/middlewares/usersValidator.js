@@ -13,7 +13,7 @@ const validateUpdate = [
     check('email')
         .isEmail().withMessage('email has to be valid')
         .custom(async function (email,{req}) {
-                if (req.user.email!=req.body.email) {
+                if (req.user.email!==req.body.email) {
                     const user=await findUserByEmail(email);
                     if (user) throw new Error('This email already exits');  
                 };
@@ -22,17 +22,17 @@ const validateUpdate = [
     check('password','password has to include at least six characters, one lowercase letter, one uppercase letter and one number')
         .isStrongPassword({minLength: 6,minLowercase: 1,minUppercase: 1,minNumbers: 1,minSymbols: 0,}),
     check('file')
-    .custom((value,{req})=>{
-        //En caso de subir un nuevo avatar, se valida la extensión del archivo.
-        if (req.files) {
-            const {file}=req.files;
-            const fileExtension=path.extname(file.name);
-            const acceptedExtensions=[".jpg",".jpeg",".png",".gif"];
-            if (!acceptedExtensions.includes(fileExtension)) 
-                throw new Error ("The file's extension must be JPG, JPEG, PNG or GIF");
-        };
-        return true
-    }),
+        .custom((value,{req})=>{
+            //En caso de subir un nuevo avatar, se valida la extensión del archivo.
+            if (req.files) {
+                const {file}=req.files;
+                const fileExtension=path.extname(file.name);
+                const acceptedExtensions=[".jpg",".jpeg",".png",".gif"];
+                if (!acceptedExtensions.includes(fileExtension)) 
+                    throw new Error ("The file's extension must be JPG, JPEG, PNG or GIF");
+            };
+            return true
+        }),
     (req, res, next) => {validate(req,res,next)}
 ];
 module.exports = {validateUpdate}

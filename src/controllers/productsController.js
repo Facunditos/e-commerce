@@ -1,5 +1,4 @@
 require("dotenv").config();
-
 const {
     getAllProductsOrderByCategoryAndSales,
     getAllProductsBySeller,
@@ -9,7 +8,7 @@ const {
     updateProduct,
     destroyProduct,
 }=require("../repositories/productsRepository");
-const {uploadToBucket}=require("../services/AWS_S3");
+const {uploadToBucket,deleteFromBucket}=require("../services/AWS_S3");
 const path=require("path");
 const productsController={
     getProductsList:async(req,res)=>{
@@ -72,7 +71,7 @@ const productsController={
                 message:'The products search can only be sorted ascendantly or descendingly'
             });
             const products=await searchProductsByNameAndOrder(name,orderBy,direction)
-            if (products.length!=0) {
+            if (products.length!==0) {
                 return res.status(200).json({
                     status:200,
                     products
@@ -141,12 +140,38 @@ const productsController={
         }
     },
     updateProduct:async(req,res)=>{
-        const {body}=req;
+        const {body,user}=req;
         const {id}=req.params;
+        const userInToken=user;
         try{
+            const product=await findProductByPk(id);
+            // Se corroborra que el usuario vendedor que realiza la petición sea el propietario del producto que se está editando-
+            if (userInToken.id!==product.seller_user_id) return res.status(403).json({
+                    status:403,
+                    message:`${userInToken.first_name}, you don't have permission to do it`,
+            });
+            // Se corroborra que exista el producto sobre el que se aplica la petición PUT
+            if (!product) return res.status(404).json({
+                status:404,
+                message:'There is no product whit this id'
+            });     
             // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Product", opere la propiedad "defaultValue"
             if (!body.description) {
-                body.description="B";
+                body.description="producto sin descripción";
+            };
+            //El usuario que solicita actualizar el producto tiene la opción de cambiar la foto del producto; si lo hace, en el servidor de AWS, se reemplaza la vieja foto por la que se envió en la petición; y en la DB, se realiza la actualización correspondiente en el campo "image_url" ; si no lo hace, continúa con la misma foto que arrastraba, sin modificaciones ni en AWS ni en la DB.
+            if (req.files) {
+                const bucket="ecommerce1287";
+                const oldImage_url=product.image_url
+                const oldImage_urlArray=oldImage_url.split(".com/");
+                const oldKey=oldImage_urlArray[1];
+                await deleteFromBucket(bucket,oldKey);
+                const {file}=req.files;
+                const newKey=`product-img/product-${Date.now()}${path.extname(file.name)}`;
+                await uploadToBucket(bucket,newKey,file);
+                body.image_url=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
+            } else {
+                body.image_url=product.image_url;
             }
             const productUpdated=await updateProduct(body,id);
             res.status(201).json({
@@ -164,17 +189,23 @@ const productsController={
     },
     deleteProduct:async(req,res)=>{
         const {id}=req.params;
+        const userInToken=req.user;
         try {
-            // Se corroborra que exista la categoría sobre la que se aplica la petición DELETE
             const product=await findProductByPk(id);
+            // Se corroborra que el usuario vendedor que realiza la petición sea el propietario del producto que se prende eliminar-
+            if (userInToken.id!==product.seller_user_id) return res.status(403).json({
+                status:403,
+                message:`${userInToken.first_name}, you don't have permission to do it`,
+            });
+            // Se corroborra que exista el producto sobre la que se aplica la petición DELETE
             if (!product) return res.status(404).json({
                 status:404,
                 message:'There is no product whit this id'
             });
-            const {Products}=product;
-            if (Products.length!=0) return res.status(400).json({
+            const {Transactions}=product;
+            if (Transactions.length!==0) return res.status(400).json({
                 status: 400,
-                error:`${req.user.first_name}, you can't do it, this product has at least one product associated`
+                error:`${userInToken.first_name}, you can't do it, this product has at least one transaction associated`
             });
             await destroyProduct(id)
             return res.status(200).json({

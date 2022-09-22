@@ -50,7 +50,7 @@ const productsRepository={
     findProductByPk:async(id)=>{
         const product=await Product.findByPk(id,{
             attributes:{
-                exclude:['seller_user_id','category_id','createdAt','updatedAt','deletedAt'],
+                exclude:['category_id','createdAt','updatedAt','deletedAt'],
                 include:[
                     [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),'sales'],
                 ]               

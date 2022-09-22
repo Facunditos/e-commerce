@@ -10,6 +10,7 @@ const usersRouter=require("./routes/users");
 const categoriesRouter=require("./routes/categories");
 const cartRouter=require("./routes/cart");
 const transactionsRouter=require("./routes/transactions");
+const salesRouter=require("./routes/sales");
 const productsRouter=require("./routes/products");
 const cartMiddleware=require("../src/middlewares/cartMiddleware");
 const port=process.env.PORT||3030;
@@ -39,6 +40,7 @@ app.use('/users', usersRouter);
 app.use('/categories', categoriesRouter);
 app.use('/me/cart',cartRouter);
 app.use('/me/transactions',transactionsRouter);
+app.use('/me/sales',salesRouter);
 app.use('/products',productsRouter);
 
 

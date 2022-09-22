@@ -96,36 +96,6 @@ const transactionsController={
             
         }
     },
-    deleteTransaction:async(req,res)=>{
-        const {id}=req.params;
-        const userInToken=req.user;
-        try {
-            const transaction=await findTransactionByPk(id);
-            if (!transaction) return res.status(404).json({
-                status:404,
-                message:'There is no transaction whit this id'
-            });
-            //El usuario que es Admin tiene habilitada la opción de eliminar la transacción. El usuario Buyer la puede eliminar si es efectivamente quien actuó como comprador en esta transacción, de esta manera se imposibilitada que un usuario que no es Admin pueda eliminar una transacción de la que no participa como comprador. 
-            if (userInToken.Role.name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
-                status:403,
-                message:`${userInToken.first_name}, you don't have permission to do it`,
-            });
-            // Primero se eliminan los registros en la tabla intermedia setéandose un array vacío para la asociación con Products. 
-            await transaction.setProducts([]);
-            await destroyTransaction(transaction.id)
-            return res.status(200).json({
-                message:'transaction deleted'
-            }); 
-             
-        } catch(error) {
-            console.log(error)
-            return res.status(500).json({
-                status:500,
-                message:'Server error'
-            })
-            
-        }
-    }
 };
 
 module.exports=transactionsController

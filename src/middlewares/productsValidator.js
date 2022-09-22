@@ -50,7 +50,7 @@ const validateUpdate = [
                 status:404,
                 message:'There is no product whit this id'
             });
-            if (productInDB.name!=req.body.name) {
+            if (productInDB.name!==req.body.name) {
                 const product=await findProductByName(name);
                 if (product) throw new Error('This product already exits');  
             };
@@ -58,7 +58,7 @@ const validateUpdate = [
     check('price',"The product's price is required and it has to be a numbe greater than zero")
         .isFloat({min:1}),
     check('category_id',"The product's category is required")
-        .notEmpty()
+        .isInt({min:1})
         .custom(async(category_id)=>{
             const category_idAsNumber=parseInt(category_id);
             const productCategory=await findCategoryByPk(category_idAsNumber);
@@ -73,7 +73,8 @@ const validateUpdate = [
     check('file')
         .custom((value,{req})=>{
             if (req.files) {
-                const image=files.file;
+                console.log('lepra');
+                const image=req.files.file;
                 const imageExtension=path.extname(image.name);
                 const acceptedExtensions=[".jpg",".jpeg",".png",".gif"];
                 if (!acceptedExtensions.includes(imageExtension)) 
