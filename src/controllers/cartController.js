@@ -142,7 +142,7 @@ const transactionsController={
                 status:404,
                 message:'Product not found'
             });
-            if (product.status!='active') return res.status(400).json({
+            if (product.status!=='active') return res.status(400).json({
                 status:400,
                 message:'We do not have stock of the product. Choose others'
             });

@@ -4,7 +4,7 @@ const express=require('express');
 const session = require("express-session");
 const logger = require("morgan");
 const fileUpload=require("express-fileupload");
-const mainRouter=require("./routes/main");
+const shopRouter=require("./routes/shop");
 const authRouter=require("./routes/auth");
 const usersRouter=require("./routes/users");
 const categoriesRouter=require("./routes/categories");
@@ -33,14 +33,13 @@ app.use(cartMiddleware);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(logger("dev"));
-app.use('/', mainRouter);
+app.use('/shop', shopRouter);
 app.use('/users/auth', authRouter);
 app.use('/users', usersRouter);
 app.use('/categories', categoriesRouter);
 app.use('/me/cart',cartRouter);
 app.use('/me/transactions',transactionsRouter);
-app.use('/products',productsRouter);
-
+app.use('/me/products',productsRouter);
 
 app.listen(port,()=>console.log(`Server is running on the port ${port}`));
 

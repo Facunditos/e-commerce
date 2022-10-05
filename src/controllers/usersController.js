@@ -20,7 +20,7 @@ const usersController={
         try{
             // en esta esta petición, que únicamente la puede realizar el usuario administrador, se trae el listado de todos los usuarios, y su vez se consumen las asosiaciones del modelo "User" con los modelos "Transaction" y "Product": a través de la primera asociación -alias: "buys"-, puede observase por usuario en cuáles transacciones participó como comprador; y en la segunda asociación -alias: "productsOnSale"-,puede observase cuáles productos tiene a la venta. 
             const users = await getAllUsers();
-            if (users.length!=0) {
+            if (users.length!==0) {
                 return res.status(200).json({
                     status:200,
                     users
@@ -46,7 +46,7 @@ const usersController={
 
             const {email}=req.query;
             const users=await searchUsersByEmail(email);
-            if (users.length!=0) {
+            if (users.length!==0) {
                 return res.status(200).json({
                     status:200,
                     users
@@ -77,7 +77,7 @@ const usersController={
                 message:'There is no user whit this id'
             });
             // A menos que quien realice la petición sea el usuario administrador, se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición, 
-            if (userInToken.id!==userInDB.id&&userInToken.Role.name!="Admin") 
+            if (userInToken.id!==userInDB.id&&userInToken.Role.name!=="Admin") 
                 return res.status(403).json({
                     status:403,
                     message:`${req.user.first_name}, you don't have permission to do it`,
@@ -108,7 +108,7 @@ const usersController={
                 message:'There is no user whit this id'
             });
             // Se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición-
-            if (userInToken.id!=userInDB.id) return res.status(403).json({
+            if (userInToken.id!==userInDB.id) return res.status(403).json({
                     status:403,
                     message:`${req.user.first_name}, you don't have permission to do it`,
             });
@@ -155,16 +155,16 @@ const usersController={
                 message:'There is no user whit this id'
             });
             // Se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición-
-            if (userInToken.id!=userInDB.id) return res.status(403).json({
+            if (userInToken.id!==userInDB.id) return res.status(403).json({
                     status:403,
                     message:`${req.user.first_name}, you don't have permission to do it`,
             });
             const {Buys,ProductsOnSale}=userInDB;
-            if (Buys.length!=0) return res.status(400).json({
+            if (Buys.length!==0) return res.status(400).json({
                 status: 400,
                 error:`${req.user.first_name}, you can't do it, you have made at least one buy`
             });
-            if (ProductsOnSale.length!=0) return res.status(400).json({
+            if (ProductsOnSale.length!==0) return res.status(400).json({
                 status: 400,
                 error:`${req.user.first_name}, you can't do it, you have at least one product on sale`
             });

@@ -15,7 +15,7 @@ const categoriesController={
         try{
             // en esta esta petición se trae el listado de todas los categorías, y su vez se consumen las asosiaciones del modelo "Category" con el modelo "Product", a través de esta asociación, puede observase cuáles productos están abarcados en cada categoría. 
             const categories = await getAllCategories();
-            if (categories.length!=0) {
+            if (categories.length!==0) {
                 return res.status(200).json({
                     status:200,
                     categories
@@ -40,7 +40,7 @@ const categoriesController={
             // Para la búsqueda se hace uso del operador "like", que permite especificar la condición que debiera cumplirse para que la búsqueda arroje un resultado, se hace uso del comodín "%" para evitar búsquedas restrictivas. La condición de búsqueda es especificada como query de la petición. En el resultado de la búsqueda se proporionan los id de los productos abarcados por cada categoría. Con los respectivos id, pueden realizarse las correspondientes peticiones para conocer el detalle de un producto.
             const {name}=req.query;
             const categories=await searchCategoriesByName(name);
-            if (categories.length!=0) {
+            if (categories.length!==0) {
                 return res.status(200).json({
                     status:200,
                     categories
@@ -142,7 +142,7 @@ const categoriesController={
                 message:'There is no category whit this id'
             });
             const {Products}=category;
-            if (Products.length!=0) return res.status(400).json({
+            if (Products.length!==0) return res.status(400).json({
                 status: 400,
                 error:`${req.user.first_name}, you can't do it, this category has at least one product associated`
             });

@@ -20,4 +20,4 @@ router.get('/:id',verifyToken,getUserDetail);
 router.put('/:id',verifyToken,validateUpdate,updateUser);
 router.delete('/:id',verifyToken,deleteUser);
 
-module.exports=router
+module.exports=router;
