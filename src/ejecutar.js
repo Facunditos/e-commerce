@@ -1,22 +1,13 @@
-const {Product}=require("./database/models/index");
-
-async function agregarProducto() {
-    try{
-        const product=await Product.create({
-            name:120,
-            description:'',
-            price:45.20,
-            seller_user_id:2,
-            category_id:3,
-            stock:450,
-            status:'active',
-            image_url:'adasdfadsdf'
-        });
-        return console.log(product);
-    } catch(e){console.log(e);}
-    
+function sumar(numeroA,numeroB){
+    return new Promise((resolve,reject)=>{
+        if (typeof numeroA!=="number" ||typeof numeroB!=="number"){
+            reject({message:'no se puede realizar la suma porque al menos uno de los argumentos no representa un númeor'});
+        };
+        resolve(numeroA+numeroB)
+    })
 };
+sumar(45,'perro').then(resultado=>{
+    console.log(resultado);
+}).catch(e=>console.log(e.message))
 
-agregarProducto();
 
-console.log('lindo día es hoy'+'\nqúe lindo día será mañana');

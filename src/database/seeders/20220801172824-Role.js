@@ -1,7 +1,7 @@
 
 const {faker}=require("@faker-js/faker")
 const rolesNames=['Admin','Buyer','Seller'];
-const defaultRoleDescription="This role doesn't have a category";
+const defaultRoleDescription="This role doesn't have a description";
 const rolesList=
   Array(3)
         .fill(0)

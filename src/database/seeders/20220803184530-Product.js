@@ -36,7 +36,7 @@ module.exports = {
         category_id: assignRandomIntegerBetween(1,categoriesList.length+1),
         stock: assignRandomIntegerBetween(1,145),
         status: 'active',
-        image_url:faker.image.animals(undefined,undefined,true),
+        image:faker.image.animals(undefined,undefined,true),
         createdAt:faker.date.recent(365*2),
           updatedAt:undefined,
           deletedAt:null

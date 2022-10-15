@@ -144,7 +144,7 @@ const productsController={
         const fileUpload=files.file;
         const bucket="ecommerce1287";
         const key=`product-img/product-${Date.now()}${path.extname(fileUpload.name)}`;
-        body.image_url=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${key}`;
+        body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${key}`;
         // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Product", opere la propiedad "defaultValue"
         if (!body.description) body.description=undefined;
         try{
@@ -183,19 +183,19 @@ const productsController={
             if (!body.description) {
                 body.description="producto sin descripción";
             };
-            //El usuario que solicita actualizar el producto tiene la opción de cambiar la foto del producto; si lo hace, en el servidor de AWS, se reemplaza la vieja foto por la que se envió en la petición; y en la DB, se realiza la actualización correspondiente en el campo "image_url" ; si no lo hace, continúa con la misma foto que arrastraba, sin modificaciones ni en AWS ni en la DB.
+            //El usuario que solicita actualizar el producto tiene la opción de cambiar la foto del producto; si lo hace, en el servidor de AWS, se reemplaza la vieja foto por la que se envió en la petición; y en la DB, se realiza la actualización correspondiente en el campo "image" ; si no lo hace, continúa con la misma foto que arrastraba, sin modificaciones ni en AWS ni en la DB.
             if (req.files) {
                 const bucket="ecommerce1287";
-                const oldImage_url=product.image_url
-                const oldImage_urlArray=oldImage_url.split(".com/");
-                const oldKey=oldImage_urlArray[1];
+                const oldimage=product.image
+                const oldimageArray=oldimage.split(".com/");
+                const oldKey=oldimageArray[1];
                 await deleteFromBucket(bucket,oldKey);
                 const {file}=req.files;
                 const newKey=`product-img/product-${Date.now()}${path.extname(file.name)}`;
                 await uploadToBucket(bucket,newKey,file);
-                body.image_url=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
+                body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
             } else {
-                body.image_url=product.image_url;
+                body.image=product.image;
             }
             const productUpdated=await updateProduct(body,id);
             res.status(201).json({

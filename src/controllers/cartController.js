@@ -155,7 +155,7 @@ const transactionsController={
             //Al objeto req.session.cart se le agrega una propiedad que tiene como clave el id del nuevo producto sumado al carrito. El valor de la propiedad es un objeto que informa, sobre este producto, el id, la url de su imagen, el nombre, la cantidad y el momento en que se suma al carro. Aclaraciones: (i) la cantidad refiere a la unidad sumada al carro, no al stock del producto; (ii) se captura el momento en que se suma al carro para, posteriormente, poder ordenar el carro -ver método sort()-.
             cart[product.id] = {
                 id: product.id,
-                image: product.image_url,
+                image: product.image,
                 name: product.name,
                 price: product.price,
                 quantity: 1,

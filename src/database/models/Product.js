@@ -75,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
         isIn: [['active', 'inactive']], 
       },
     },
-    image_url: {
+    image: {
       type:DataTypes.STRING(150),
       allowNull:false,
       validate:{

@@ -25,7 +25,9 @@
     "morgan": "^1.10.0",
     "mysql2": "^2.3.3",
     "nodemon": "^2.0.16",
-    "sequelize": "^6.21.3",
-    "sequelize-cli": "^6.4.1"
+    "sequelize": "^6.25.0",
+    "sequelize-cli": "^6.5.1",
+    "swagger-jsdoc": "^6.2.5",
+    "swagger-ui-express": "^4.5.0"
   }
 }

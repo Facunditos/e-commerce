@@ -14,7 +14,7 @@ const productsRepository={
                 "id",
                 "name",
                 "price",
-                'image_url',
+                'image',
                 [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'sales'],
                 [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
             ],
@@ -33,7 +33,7 @@ const productsRepository={
                 "id",
                 "name",
                 "price",
-                'image_url',
+                'image',
                 [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'sales'],
                 [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
             ],
@@ -57,7 +57,7 @@ const productsRepository={
                 "id",
                 "name",
                 "price",
-                'image_url',
+                'image',
                 [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'total sales'],
                 [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
             ],
@@ -121,7 +121,7 @@ const productsRepository={
             category_id:body.category_id,
             stock:body.stock,
             status:body.status,
-            image_url:body.image_url,
+            image:body.image,
             
         });
         product=await Product.findByPk(product.id,{
@@ -141,7 +141,7 @@ const productsRepository={
             category_id:body.category_id,
             stock:body.stock,
             status:body.status,
-            image_url:body.image_url,
+            image:body.image,
         },{
             where:{
                 id

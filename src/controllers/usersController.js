@@ -112,20 +112,20 @@ const usersController={
                     status:403,
                     message:`${req.user.first_name}, you don't have permission to do it`,
             });
-            //El usuario que solicita actualizar su registro tiene la opción de cambiar su avatar; si lo hace, en el servidor de AWS, se reemplaza el viejo avatar por el que se envió en la petición, y en la DB, se realiza la actualización correspondiente en el campo "image_url" ; si no lo hace, continúa con el mismo avatar que arrastraba, sin modificaciones ni en AWS ni en la DB.
+            //El usuario que solicita actualizar su registro tiene la opción de cambiar su avatar; si lo hace, en el servidor de AWS, se reemplaza el viejo avatar por el que se envió en la petición, y en la DB, se realiza la actualización correspondiente en el campo "image" ; si no lo hace, continúa con el mismo avatar que arrastraba, sin modificaciones ni en AWS ni en la DB.
             if (req.files) {
                 const bucket="ecommerce1287";
-                const oldImage_url=userInDB.image_url
-                const oldImage_urlArray=oldImage_url.split(".com/");
-                const oldKey=oldImage_urlArray[1];
+                const oldimage=userInDB.image
+                const oldimageArray=oldimage.split(".com/");
+                const oldKey=oldimageArray[1];
                 console.log(bucket,oldKey);
                 await deleteFromBucket(bucket,oldKey);
                 const {file}=req.files;
                 const newKey=`user-img/user-${Date.now()}${path.extname(file.name)}`;
                 await uploadToBucket(bucket,newKey,file);
-                body.image_url=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
+                body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
             } else {
-                body.image_url=userInDB.image_url;
+                body.image=userInDB.image;
             }
             body.password=bcryptjs.hashSync(body.password,10);
             const userUpdated=await updateUser(body,id)

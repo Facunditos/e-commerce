@@ -20,7 +20,7 @@ const usersList=
         password:undefined,
         email:undefined,
         role_id:assingRoleId(index),
-        image_url:faker.image.avatar(),
+        image:faker.image.avatar(),
         createdAt:faker.date.recent(365*2),
         updatedAt:undefined,
         deletedAt:null
@@ -31,18 +31,7 @@ const usersList=
         user.email=`${user.first_name.toLowerCase()}${user.last_name.toLowerCase()}@gmail.com`;
         user.updatedAt=user.createdAt;
         return user;
-    })
-    .fill({
-        first_name:"Admin",
-        last_name:"Admin",
-        email:"ecommerce1287@gmail.com",
-        password:createHashPassword('Admin'),
-        role_id:1,
-        image_url:"https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png",
-        createdAt:new Date("2017-01-15 08:30:45"),
-        updatedAt:new Date("2017-01-15 08:30:45"),
-        deletedAt:null
-    },0,1);
+    });
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert(

@@ -20,16 +20,15 @@ const authController={
     registerUser:async(req,res)=>{
         let {body}=req;
         //Aquellos usuarios que tienen el rol como administrador, deben ser incluidos en la lista de usuarios administradores, pues para asignarle este rol, se consulta si el usuario forma parte de esta lista, en caso que así sea se cambia el valor de la propiedad "role_id" que viene del body por el número  el número 1 -se definió en la tabla roles que el id 1 es el que corresponde para el usuario administrador-. 
-        const adminUsers=["e_commerce@gmail.com"];
+        const adminUsers=["ecommerce1287@gmail.com"];
         try {
             //En el caso que el usuario decida subir una imagen como avatar, ésta se almacena en el bucket de Amazon. Si no sube ninguna imagen, se le asigna el avatar anónimo.
             if (req.files) {
-                console.log('VAMOS');
-                const {file}=req.files;
+                const {image}=req.files;
                 const bucket="ecommerce1287";
-                const key=`user-img/user-${Date.now()}${path.extname(file.name)}`;
-                await uploadToBucket(bucket,key,file);
-                body.image_url=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${key}`;
+                const key=`user-img/user-${Date.now()}${path.extname(image.name)}`;
+                await uploadToBucket(bucket,key,image);
+                body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${key}`;
             };
             body.password=bcryptjs.hashSync(body.password,10);
             if (adminUsers.includes(body.email)) body.role_id=1;
@@ -56,16 +55,16 @@ const authController={
             let {email,password}=req.body;
             let user=await findUserByEmail(email);
             if (!user) {
-                return res.status(400).json({
-                    status:400,
-                    message:'There is no user whit this email. You have to register'
+                return res.status(404).json({
+                    status:404,
+                    message:'There is an error in the email. Try it again'
                 });
             };
             const hashPassword=user.password;
             let isRightPassword=bcryptjs.compareSync(password,hashPassword);
             if (!isRightPassword) {
-                return res.status(400).json({
-                    status:400,
+                return res.status(404).json({
+                    status:404,
                     message:'There is an error in the password. Try it again'
                 })
             };
@@ -82,7 +81,7 @@ const authController={
             console.log("auth",req.session.email);
             res.status(200).json({
                 status:200,
-                message:'User logged',
+                message:'User logged in',
                 user,
                 token
             })

@@ -12,6 +12,9 @@ const cartRouter=require("./routes/cart");
 const transactionsRouter=require("./routes/transactions");
 const productsRouter=require("./routes/products");
 const cartMiddleware=require("../src/middlewares/cartMiddleware");
+const swaggerUI=require("swagger-ui-express");
+const swaggerJsDoc=require("swagger-jsdoc");
+const swaggerSpec=require("./swagger/config");
 const port=process.env.PORT||3030;
 
 const app=express();
@@ -33,14 +36,19 @@ app.use(cartMiddleware);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(logger("dev"));
-app.use('/shop', shopRouter);
-app.use('/users/auth', authRouter);
-app.use('/users', usersRouter);
-app.use('/categories', categoriesRouter);
-app.use('/me/cart',cartRouter);
-app.use('/me/transactions',transactionsRouter);
-app.use('/me/products',productsRouter);
-
+app.use('/api/v1/shop', shopRouter);
+app.use('/api/v1/users/auth', authRouter);
+app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/categories', categoriesRouter);
+app.use('/api/v1/me/cart',cartRouter);
+app.use('/api/v1/me/transactions',transactionsRouter);
+app.use('/api/v1/me/products',productsRouter);
+app.use('/api/v1/doc',swaggerUI.serve,swaggerUI.setup(swaggerJsDoc(swaggerSpec)));
+const router=express.Router();
+app.use('/viewForm',router.get('/',(req,res)=>res.render('form')));
+app.use('/recieveForm',router.post('/',(req,res)=>{
+    req.body.role=parseInt(req.body.role)
+    console.log(req.body)
+}));
 app.listen(port,()=>console.log(`Server is running on the port ${port}`));
-
 module.exports=app

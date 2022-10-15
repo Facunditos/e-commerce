@@ -33,7 +33,7 @@ module.exports = {
           key:"id"
         }
       },
-      image_url: {
+      image: {
         allowNull: false,
         defaultValue:"https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png",
         type: Sequelize.STRING(150)
