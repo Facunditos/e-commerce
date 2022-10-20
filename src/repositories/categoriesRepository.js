@@ -2,11 +2,10 @@ const {Category}=require("../database/models/index");
 const {Op}=require("sequelize")
 
 const categoriesRepository={
-    getAllCategories:async()=>{
-        const categories=await Category.findAll({
-            include:[
-                {association:'Products'},
-            ],
+    getAllCategories:async(offset)=>{
+        const categories=await Category.findAndCountAll({
+            limit:5,
+            offset
         });
         return categories
     },
@@ -55,11 +54,6 @@ const categoriesRepository={
         let category=await Category.create({
             name:body.name,
             description:body.description,
-        });
-        category=await Category.findByPk(category.id,{
-            include:[
-                {association:'Products'},
-            ],
         });
         return category
     },

@@ -45,10 +45,15 @@ app.use('/api/v1/me/transactions',transactionsRouter);
 app.use('/api/v1/me/products',productsRouter);
 app.use('/api/v1/doc',swaggerUI.serve,swaggerUI.setup(swaggerJsDoc(swaggerSpec)));
 const router=express.Router();
-app.use('/viewForm',router.get('/',(req,res)=>res.render('form')));
-app.use('/recieveForm',router.post('/',(req,res)=>{
-    req.body.role=parseInt(req.body.role)
-    console.log(req.body)
+app.use('/',router.get('/view',(req,res)=>res.render('form')));
+app.use('/',router.post('/recieveFormPOST',(req,res)=>{
+    res.json(req.body);
+}));
+app.use('/',router.get('/recieveFormGET',(req,res)=>{
+    res.json(req.query);
+}));
+app.use('/',router.get('/recieveLink',(req,res)=>{
+    res.json(req.query);
 }));
 app.listen(port,()=>console.log(`Server is running on the port ${port}`));
 module.exports=app

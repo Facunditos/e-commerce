@@ -22,7 +22,7 @@ const transactionsController={
         page=parseInt(page);
         if (isNaN(page)||page<0) return res.status(400).json({
             status:400,
-            message:"Page does't exist",
+            message:"That page does't exist",
         });
         page=parseInt(page);
         try{
@@ -45,9 +45,9 @@ const transactionsController={
             });
             //En base a considerar que se quiere devolver cinco registros, se indica la máxima página que corresponde según la cantidad de transacciones encontradas. 
             const maxPage=Math.ceil(count/5);
-            if (maxPage<page) return res.status(400).json({
-                status:400,
-                message:"Page does't exist",
+            if (maxPage<page) return res.status(404).json({
+                status:404,
+                message:"That page does't exist",
             });
             const previousPage=page==1?1:page-1;
             const nextPage=page==maxPage?page:page+1;

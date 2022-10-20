@@ -74,7 +74,7 @@ const authController={
                 {payload},
                 process.env.SECRETORPRIVATEKEY,
                 {
-                  expiresIn: "4h",
+                  expiresIn: "8h",
                 },
             );
             req.session.email=user.email;

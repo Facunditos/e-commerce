@@ -124,13 +124,6 @@ const productsRepository={
             image:body.image,
             
         });
-        product=await Product.findByPk(product.id,{
-            include:[
-                {association:'Seller'},
-                {association:'Transactions'},
-                {association:'Category'}
-            ],
-        });
         return product
     },
     updateProduct:async(body,id)=>{

@@ -51,12 +51,6 @@ const transactionsRepository={
             buyer_user_id:body.buyer_user_id,
             worth:body.cartWorth,
         });
-        transaction=await Transaction.findByPk(transaction.id,{
-            include:[
-                {association:'Buyer'},
-                {association:'Products'},
-            ],
-        });
         return transaction
     },
     updateTransaction:async(id,body)=>{

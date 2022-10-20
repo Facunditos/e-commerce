@@ -12,28 +12,47 @@ const {
 
 const categoriesController={
     getCategoriesList:async(req,res)=>{
+        //El número de página al que se quiere acceder es indicado como query al final de la url.
+        let {page}=req.query;
+        //En caso que no haya sido indicado - req.page=undefenid -, se asigna por defecto la página 1. 
+        if (!page) page=1;
+        //Si el cliente definió la página que quiere consulta, pero el valor no se puede parsear, se devuelve el error.
+        page=parseInt(page);
+        if (isNaN(page)||page<0) return res.status(400).json({
+            status:400,
+            message:"That page does't exist",
+        });
+        page=parseInt(page);
         try{
-            // en esta esta petición se trae el listado de todas los categorías, y su vez se consumen las asosiaciones del modelo "Category" con el modelo "Product", a través de esta asociación, puede observase cuáles productos están abarcados en cada categoría. 
-            const categories = await getAllCategories();
-            if (categories.length!==0) {
-                return res.status(200).json({
-                    status:200,
-                    categories
-                })
-            } else {
-                return res.status(404).json({
-                    status:404,
-                    message:'There are no category'
-                }) 
-            }
+            const results=await getAllCategories(5*(page-1));
+            count=results.count;
+            rows=results.rows;
+            if (count==0) return res.status(404).json({
+                status:404,
+                message:'There is no category'
+            });
+            const maxPage=Math.ceil(count/5);
+            if (maxPage<page) return res.status(404).json({
+                status:404,
+                message:"That page does't exist",
+            });
+            const previousPage=page==1?1:page-1;
+            const nextPage=page==maxPage?page:page+1;
+            return res.status(200).json({
+                status:200,
+                previouspage:`/api/v1/categories?page=${previousPage}`,
+                nextpage:`/api/v1/categories?page=${nextPage}`,
+                count,
+                users:rows,
+            });
         } catch(error) {
-            console.log(error)
+            console.log(error);
             return res.status(500).json({
                 status:500,
                 message:'Server error'
-            })
+            });
             
-        }
+        };
     },
     searchCategoriesByName:async(req,res)=>{
         try {

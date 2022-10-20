@@ -2,14 +2,13 @@ const {User}=require("../database/models/index");
 const {Op}=require('sequelize')
 
 const usersRepository={
-    getAllUsers:async()=>{
-        const users=await User.findAll({
-            include:[
-                {association:'Buys'},
-                {association:'ProductsOnSale'},
-                {association:'Role'}
-
-            ],
+    getAllUsers:async(offset)=>{
+        const users=await User.findAndCountAll({
+            attributes:{
+                exclude:['password']
+            },
+            offset,
+            limit:5
         });
         return users
     },
@@ -38,19 +37,15 @@ const usersRepository={
         });
         return user
     },
-    searchUsersByEmail:async(email)=>{
-        const users=await User.findAll({
+    searchUsersByEmail:async(email,offset)=>{
+        const users=await User.findAndCountAll({
             where:{
                 email:{[Op.like]:`%${email}%`}
             },
-            include:[
-                {association:'Buys'},
-                {association:'ProductsOnSale'},
-                {association:'Role'}
-
-            ],
+            limit:5,
+            offset
         });
-        return users
+        return users;
     },
     createUser:async(body)=>{
         let user=await User.create({
@@ -61,14 +56,6 @@ const usersRepository={
             role_id:body.role_id,
             edad:body.edad,
             image:body.image
-        });
-        user=await User.findByPk(user.id,{
-            include:[
-                {association:'Buys'},
-                {association:'ProductsOnSale'},
-                {association:'Role'}
-
-            ],
         });
         return user;
     },
