@@ -1,13 +1,28 @@
-function sumar(numeroA,numeroB){
-    return new Promise((resolve,reject)=>{
-        if (typeof numeroA!=="number" ||typeof numeroB!=="number"){
-            reject({message:'no se puede realizar la suma porque al menos uno de los argumentos no representa un númeor'});
-        };
-        resolve(numeroA+numeroB)
-    })
-};
-sumar(45,'perro').then(resultado=>{
-    console.log(resultado);
-}).catch(e=>console.log(e.message))
-
-
+const numbersArray=[{
+        number:15
+    },{
+        number:5    
+    },{
+        number:12
+    }];
+const array=numbersArray.forEach(function(element,index){
+    element.number+=10;
+});
+console.log("-----------forEach--------------------");
+console.log(numbersArray);
+console.log(array);
+console.log("-----------map--------------------");
+const numbers=[{
+        name:'Facundo',
+        number:15
+    },{
+        name:'Fernando',
+        number:5    
+    },{
+        name:'Fausto',
+        number:12
+    }];
+const newNumbers=numbers.splice(1,1,12)
+console.log(numbers);
+console.log(newNumbers);
+Array().forEach()

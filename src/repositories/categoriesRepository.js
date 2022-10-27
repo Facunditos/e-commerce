@@ -9,21 +9,49 @@ const categoriesRepository={
         });
         return categories
     },
-    searchCategoriesByName:async(name)=>{
-        const categories=await Category.findAll({
+    searchCategoriesByName:async(name,offset)=>{
+        const categories=await Category.findAndCountAll({
             where:{
                 name:{[Op.like]:`%${name}%`}
             },
-            include:[
-                {association:'Products'},
-            ],
+            limit:5,
+            offset
         });
         return categories
     },
     findCategoryByPk:async(id)=>{
         const category=await Category.findByPk(id,{
+            attributes:[
+                'name',
+                'description',
+            ],
             include:[
-                {association:'Products'},
+                {
+                    association:'Products',
+                    required:false,
+                    where:{
+                        status:'active',
+                    },
+                    attributes:[
+                        'id',
+                        'name',
+                        'description',
+                        'price',
+                        'image'
+                    ],
+                    include:[
+                        {
+                            association:'Seller',
+                            attributes:[
+                                'id',
+                                'first_name',
+                                'last_name',
+                                'email',
+                                'image',
+                            ],
+                        },
+                    ]
+                },
             ],
         });
         return category
@@ -33,20 +61,6 @@ const categoriesRepository={
             where:{
                 name
             },
-            include:[
-                {association:'Products'},
-            ],
-        });
-        return category
-    },
-    findCategoryByName:async(name)=>{
-        const category=await Category.findOne({
-            where:{
-                name
-            },
-            include:[
-                {association:'Products'},
-            ],
         });
         return category
     },
@@ -66,11 +80,7 @@ const categoriesRepository={
                 id
             }
         });
-        const category=await Category.findByPk(id,{
-            include:[
-                {association:'Products'},
-            ],
-        });
+        const category=await Category.findByPk(id);
         return category
     },
     destroyCategory:async(id)=>{

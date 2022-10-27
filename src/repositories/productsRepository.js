@@ -3,22 +3,24 @@ const sequelize=require("sequelize");
 const {Op}=require("sequelize");
 
 const productsRepository={
-    getAllProductsOrderByCategoryAndSales:async(offset,sellerId)=>{
-        const allSellers={[Op.gte]:0}
+    getAllProductsOrderBySales:async(offset,sellerId)=>{
         const oneSeller=sellerId;
+        const allSellers={[Op.gte]:0};
+        const allStatus=['active','inactive'];
         const products=await Product.findAndCountAll({
             where:{
-                seller_user_id:sellerId?oneSeller:allSellers
+                seller_user_id:sellerId?oneSeller:allSellers,
+                status:sellerId?allStatus:'active',
             },
-            attributes:[
-                "id",
-                "name",
-                "price",
-                'image',
-                [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'sales'],
-                [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
-            ],
-            order:[sequelize.literal('category'),[sequelize.literal('sales'),'desc']],
+            attributes:{
+                include:[
+                    [
+                        sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),
+                        'sales'
+                    ]
+                ],
+            },
+            order:[['sales','DESC']],
             limit:5,
             offset
         });
@@ -43,37 +45,48 @@ const productsRepository={
         });
         return products
     },
-    searchProductsByNameAndOrder:async(name,orderByAttribute,direction,offset,sellerId)=>{
-        if (orderByAttribute==undefined) orderByAttribute='name';
-        if (direction==undefined) direction='asc';
+    searchProductsByNameAndOrder:async(name,orderBy,order,offset,sellerId)=>{
+        if (orderBy===undefined) orderBy='sales';
+        if (order===undefined) {
+            if (orderBy==='sales') {
+                order='desc';
+            } else {
+                order='asc';
+            };
+        };
         const allSellers={[Op.gte]:0}
         const oneSeller=sellerId;
+        const allStatus=['active','inactive'];
         const products=await Product.findAndCountAll({
             where:{
                 name:{[Op.like]:`%${name}%`},
-                seller_user_id:sellerId?oneSeller:allSellers
+                seller_user_id:sellerId?oneSeller:allSellers,
+                status:sellerId?allStatus:'active',
             },
-            attributes:[
-                "id",
-                "name",
-                "price",
-                'image',
-                [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'total sales'],
-                [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
-            ],
-            order:[[orderByAttribute,direction]],
+            attributes:{
+                include:[
+                    [
+                        sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),
+                        'sales'
+                    ],
+                ],
+            },
+            order:[[orderBy,order]],
             limit:5,
             offset
             
         });
-        return products
+        return products;
     },
     findProductByPk:async(id)=>{
         const product=await Product.findByPk(id,{
             attributes:{
-                exclude:['category_id','createdAt','updatedAt','deletedAt'],
+                exclude:['id','seller_user_id','category_id','createdAt','updatedAt','deletedAt'],
                 include:[
-                    [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),'sales'],
+                    [
+                        sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),
+                        'total sales'
+                    ],
                 ]               
             },
             include:[
@@ -87,10 +100,15 @@ const productsRepository={
                 },
                 {
                     association:'Transactions',
-                    attributes:[
-                        ['createdAt','sale date'],
-                        [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id AND transaction_product.transaction_id=transactions.id)'),'sales']
-                    ],
+                    attributes:{
+                        exclude:['id','buyer_user_id','worth','deletedAt','updatedAt'],
+                        include:[
+                            [
+                                sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id AND transaction_product.transaction_id=Transactions.id)'),
+                                'sale'
+                            ],
+                        ]
+                    },
                     include:[
                         {
                             association:'Buyer',
@@ -98,10 +116,9 @@ const productsRepository={
                         }
                     ]
                 },
-
             ]
         });
-        return product
+        return product;
     },
     findProductByName:async(name)=>{
         const product=await Product.findOne({

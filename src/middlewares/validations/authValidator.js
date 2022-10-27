@@ -1,6 +1,6 @@
 const { check} = require('express-validator');
-const { validate } = require('../util/validateHelper');
-const { findUserByEmail} = require('../repositories/usersRepository');
+const { validate } = require('../../util/validateHelper');
+const { findUserByEmail} = require('../../repositories/usersRepository');
 const path=require("path");
 const validateRegister = [
     check('first_name','the first_name is required and it has to include at least three letters')

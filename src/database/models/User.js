@@ -63,11 +63,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     image: {
       type:DataTypes.STRING(150),
-      allowNull:false,
       defaultValue:"https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png",
-      validate:{
-        notEmpty:true,
-      },
     },
     deletedAt: DataTypes.DATE
   }, {

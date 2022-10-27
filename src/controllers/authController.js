@@ -54,6 +54,7 @@ const authController={
         try {
             let {email,password}=req.body;
             let user=await findUserByEmail(email);
+            console.log(user)
             if (!user) {
                 return res.status(404).json({
                     status:404,

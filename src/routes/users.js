@@ -2,7 +2,7 @@ const express=require('express');
 const router=express.Router();
 const verifyToken=require("../middlewares/verifyToken");
 const verifyIsAdmin=require("../middlewares/verifyIsAdmin");
-const {validateUpdate}=require("../middlewares/usersValidator");
+const {validateUpdate}=require("../middlewares/validations/usersValidator");
 
 const {
     getUsersList,

@@ -60,11 +60,9 @@ const usersController={
     searchUsersByEmail:async(req,res)=>{
         //El número de página al que se quiere acceder es indicado como query al final de la url.
         let {page,email}=req.query;
-        console.log('req.query',req.query);
-        // En caso que no haya ingresado un criterio de búsqueda entre los emails de los usuarios se devuele un error.
         if (!email||email.length==0) return res.status(400).json({
             status:400,
-            message:"You have to include at least one letter",
+            message:"You have to include at least one letter to search users",
         });
         //En caso que no haya sido indicado - req.query.page=undefenid -, se asigna por defecto la página 1. 
         if (!page) page=1;
@@ -115,7 +113,7 @@ const usersController={
             const userInDB=await findUserByPk(id);
             if (!userInDB) return res.status(404).json({
                 status:404,
-                message:'There is no user whit this id'
+                message:'There is no user whit that id'
             });
             // A menos que quien realice la petición sea el usuario administrador, se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición, 
             if (userInToken.id!==userInDB.id&&userInToken.Role.name!=="Admin") 
@@ -146,7 +144,7 @@ const usersController={
             const userInDB=await findUserByPk(id);
             if (!userInDB) return res.status(404).json({
                 status:404,
-                message:'There is no user whit this id'
+                message:'There is no user whit that id'
             });
             // Se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición-
             if (userInToken.id!==userInDB.id) return res.status(403).json({
@@ -192,7 +190,7 @@ const usersController={
             const userInDB=await findUserByPk(id);
             if (!userInDB) return res.status(404).json({
                 status:404,
-                message:'There is no user whit this id'
+                message:'There is no user whit that id'
             });
             // Se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición-
             if (userInToken.id!==userInDB.id) return res.status(403).json({

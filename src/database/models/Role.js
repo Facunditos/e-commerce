@@ -27,8 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type:DataTypes.TEXT,
-      allowNull:false,
-      defaultValue:'role without description',
+      defaultValue:'The role does not have a description',
     },
     deletedAt: DataTypes.DATE
   }, {

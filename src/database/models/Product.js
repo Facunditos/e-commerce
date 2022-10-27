@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type:DataTypes.TEXT,
-      defaultValue:'producto sin descripción',
+      defaultValue:'This product does not have a description',
     },
     price: {
       type:DataTypes.FLOAT(25,2),

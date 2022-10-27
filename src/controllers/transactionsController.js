@@ -30,7 +30,7 @@ const transactionsController={
             //La clave count almacena la cantidad de transacciones encontradas para la query especificada, sin tener en cuenta si se indicó limitar la cantidad de registros devueltos. La clase rows almacena el array de transacciones que se quieren mostrar. 
             let count;
             let rows;
-            if (user.Role.name=="Admin") {
+            if (user.role_name=="Admin") {
                 const results=await getAllTransactions(5*(page-1));
                 count=results.count;
                 rows=results.rows;
@@ -76,7 +76,7 @@ const transactionsController={
             const transaction=await findTransactionByPk(id);
             if (!transaction) return res.status(404).json({
                 status:404,
-                message:'There is no transaction whit this id'
+                message:'There is no transaction whit that id'
             });
             if (userInToken.Role.name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
                 status:403,

@@ -1,8 +1,8 @@
 const { check} = require('express-validator');
-const { validate } = require('../util/validateHelper');
+const { validate } = require('../../util/validateHelper');
 require("dotenv").config();
 
-const {findUserByEmail}=require("../repositories/usersRepository");
+const {findUserByEmail}=require("../../repositories/usersRepository");
 const path=require("path");
 
 const validateUpdate = [

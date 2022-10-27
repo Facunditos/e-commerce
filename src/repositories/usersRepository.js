@@ -1,4 +1,4 @@
-const {User}=require("../database/models/index");
+const {User, sequelize, Sequelize}=require("../database/models/index");
 const {Op}=require('sequelize')
 
 const usersRepository={
@@ -14,11 +14,27 @@ const usersRepository={
     },
     findUserByPk:async(id)=>{
         const user=await User.findByPk(id,{
+            attributes:['first_name','last_name','email','image'],
             include:[
-                {association:'Buys'},
-                {association:'ProductsOnSale'},
-                {association:'Role'}
-
+                {
+                    association:'Buys',
+                    attributes:[
+                        'id',
+                        'worth',
+                        'createdAt'
+                    ]
+                },
+                {
+                    association:'ProductsOnSale',
+                    attributes:[
+                        'id',
+                        'name',
+                    ],
+                },
+                {
+                    association:'Role',
+                    attributes:['name']
+                }
             ],
         });
         return user
@@ -28,14 +44,16 @@ const usersRepository={
             where:{
                 email
             },
-            include:[
-                {association:'Buys'},
-                {association:'ProductsOnSale'},
-                {association:'Role'}
-
-            ],
+            attributes:{
+                include:[
+                    [
+                        Sequelize.literal('(select name from roles where roles.id=User.role_id)'),
+                        'role_name'
+                    ],
+                ],
+            },
         });
-        return user
+        return user;
     },
     searchUsersByEmail:async(email,offset)=>{
         const users=await User.findAndCountAll({
@@ -71,14 +89,7 @@ const usersRepository={
                 id
             }
         });
-        const user=await User.findByPk(id,{
-            include:[
-                {association:'Buys'},
-                {association:'ProductsOnSale'},
-                {association:'Role'}
-
-            ],
-        });
+        const user=await User.findByPk(id);
         return user
     },
     destroyUser:async(id)=>{

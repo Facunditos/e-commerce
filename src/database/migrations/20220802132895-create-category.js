@@ -15,7 +15,6 @@ module.exports = {
       },
       description: {
         type: Sequelize.TEXT,
-        allowNull:false,
         defaultValue:"This category doesn't have a category",
       },
       deletedAt: {

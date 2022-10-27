@@ -1,8 +1,8 @@
 const path=require("path");
 const { check} = require('express-validator');
-const { validate } = require('../util/validateHelper');
-const {findCategoryByPk}=require("../repositories/categoriesRepository");
-const {findProductByName, findProductByPk}=require("../repositories/productsRepository");
+const { validate } = require('../../util/validateHelper');
+const {findCategoryByPk}=require("../../repositories/categoriesRepository");
+const {findProductByName, findProductByPk}=require("../../repositories/productsRepository");
 
 const validateCreate = [
     check('name',"The product's name is required and it has to include at least three letters")
@@ -48,7 +48,7 @@ const validateUpdate = [
             const productInDB=await findProductByPk(id);
             if (!productInDB) return res.status(404).json({
                 status:404,
-                message:'There is no product whit this id'
+                message:'There is no product whit that id'
             });
             if (productInDB.name!==req.body.name) {
                 const product=await findProductByName(name);

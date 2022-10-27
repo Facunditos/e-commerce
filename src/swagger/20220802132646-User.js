@@ -6,7 +6,8 @@
  *       type: object
  *       properties:
  *        id:
- *         type: integer                                  
+ *         type: integer    
+ *         example: 52                              
  *        first_name:
  *         type: string
  *         minLength: 3 
@@ -17,6 +18,7 @@
  *         example: 'López Crespo'     
  *        email:
  *         type: string
+ *         format: email
  *         description: "The user's email has to be valid and unique in the DB" 
  *         example: 'facundoloprezcrespo@hotmail.com'
  *        password:
@@ -27,22 +29,26 @@
  *         type: integer
  *         minimum: 2
  *         maximum: 3
- *         description: 'role_id=2 (buyer) || role_id=3 (seller). In case the user signing up be part of the admin users list, the server changes the role to admin' 
+ *         description: 'role ID: 2=buyer || 3=seller. In case the user signing up be part of the admin users list, the server changes the role_id to 1 (admin)' 
  *         example: 2
  *        image:
  *         type: string
  *         format: binary
- *         description: 'In case the user does not upload an image, it will be assigned by default'     
+ *         description: "In case the user upload an image, this will be storage in the AWS S3's bucket, if the user does not, this will be assigned by default"
+ *         example: 'https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png'
  *        createdAt:
  *         type: string
  *         format: date-time
+ *         example: '2022-18-10 16:20:10'
  *        updatedAt:
  *         type: string
  *         format: date-time
+ *         example: '2022-18-10 16:20:10'
  *        deletedAt:
  *         type: string
  *         format: date-time 
  *         description: 'This attribute is necessary to use the soft delete method'
+ *         example: '2022-18-10 16:20:10'
  *       required:
  *         - first_name
  *         - last_name
@@ -56,7 +62,7 @@
  *          email: 'facundolopezcrespo@hotmail.com'
  *          password: '$10$y4xEtOQovjaXP4gWojrf7uTExKk3BvVxDBP1two.aVrKGfftAflfa'
  *          role_id: 2  
- *          image: 'east-1.amazonaws.com/user-img/user-anonymous.png'
+ *          image: 'https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png'
  *          createdAt: '2022-18-10 16:20:10'
  *          updatedAt: '2022-18-10 16:20:10'
  *          deletedAt: null
@@ -243,8 +249,8 @@
  *                                  description: 'The url necessary to view the next page'
  *                              count:
  *                                  type: integer
- *                                  description: 'The amount of user in the DB'                
- *                              rows: 
+ *                                  description: 'The amount of users in the DB'                
+ *                              users: 
  *                                  type: array
  *                                  description: array of users 
  *                                  items: 
@@ -254,11 +260,11 @@
  *                              previosPage: '/api/v1/users?page=1'
  *                              nextPage: '/api/v1/users?page=3'
  *                              count: 55               
- *                              rows:
+ *                              users:
  *                                  - "id": 6
  *                                    "first_name": "Korbin"
  *                                    "last_name": "Hoppe"
- *                                    "email": "Hoppe"
+ *                                    "email": "korbinhoppe@gmail.com"
  *                                    "role_id": "3"
  *                                    "image": "https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png"
  *                                    "deletedAt": "2022-10-14 18:53:36"
@@ -326,7 +332,6 @@
  *            name: email
  *            schema:
  *              type: string
- *            required: true
  *            description: 'the past string is used to find specific users whose emails include it'
  *                
  *      security:
@@ -350,8 +355,8 @@
  *                                  description: 'The url necessary to view the next page'
  *                              count:
  *                                  type: integer
- *                                  description: 'The amount of user in the DB'                
- *                              rows: 
+ *                                  description: 'The amount of users in the DB'                
+ *                              users: 
  *                                  type: array
  *                                  description: array of users 
  *                                  items: 
@@ -361,11 +366,11 @@
  *                              previosPage: '/api/v1/users/sear?page=1'
  *                              nextPage: '/api/v1/users?page=3'
  *                              count: 7              
- *                              rows:
+ *                              users:
  *                                  - "id": 6
  *                                    "first_name": "Korbin"
  *                                    "last_name": "Hoppe"
- *                                    "email": "Hoppe"
+ *                                    "email": "korbinhoppe@gamil.com"
  *                                    "role_id": "3"
  *                                    "image": "https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png"
  *                                    "deletedAt": "2022-10-14 18:53:36"
@@ -399,7 +404,7 @@
  *  get:
  *      tags: ['User']       
  *      summary: 'Get a user detail'  
- *      description: 'This request only could be done by the admin or the user whose id is includes as path parameter'
+ *      description: 'It shows asocciation with others classes. This request only could be done by the admin or the user whose id is includes as path parameter'
  *      parameters: 
  *          - $ref: '#/components/parameters/ID'
  *      security:
@@ -423,7 +428,7 @@
  *                                  "id": 6
  *                                  "first_name": "Korbin"
  *                                  "last_name": "Hoppe"
- *                                  "email": "Hoppe"
+ *                                  "email": "korbinhoppe@gmail.com"
  *                                  "role_id": "3"
  *                                  "image": "https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png"
  *                                  "deletedAt": "2022-10-14 18:53:36"

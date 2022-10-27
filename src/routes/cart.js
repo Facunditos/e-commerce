@@ -2,7 +2,7 @@ const express=require('express');
 const router=express.Router();
 const verifyToken=require("../middlewares/verifyToken");
 const verifyIsBuyer=require("../middlewares/verifyIsBuyer");
-const validateSetQuantity=require("../middlewares/cartValidator");
+const validateSetQuantity=require("../middlewares/validations/cartValidator");
 
 const {
     getCart,

@@ -15,7 +15,6 @@ module.exports = {
       },
       description: {
         type: Sequelize.TEXT,
-        allowNull:false,
         defaultValue:"This role doesn't have a description",
       },
       deletedAt: {
