@@ -78,7 +78,7 @@ const transactionsController={
                 status:404,
                 message:'There is no transaction whit that id'
             });
-            if (userInToken.Role.name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
+            if (userInToken.role_name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
                 status:403,
                 message:`${userInToken.first_name}, you don't have permission to do it`,
             });
@@ -106,7 +106,7 @@ const transactionsController={
                 message:'There is no transaction whit this id'
             });
             //El usuario que es Admin tiene habilitada la opción de eliminar la transacción. El usuario Buyer la puede eliminar si es efectivamente quien actuó como comprador en esta transacción, de esta manera se imposibilitada que un usuario que no es Admin pueda eliminar una transacción de la que no participa como comprador. 
-            if (userInToken.Role.name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
+            if (userInToken.role_name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
                 status:403,
                 message:`${userInToken.first_name}, you don't have permission to do it`,
             });

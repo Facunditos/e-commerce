@@ -114,14 +114,14 @@ const transactionsController={
                 }).format(detail.price);
                 detail.quantity=new Intl.NumberFormat().format(detail.quantity)
             }
-            res.status(201).json({
+            return res.status(201).json({
                 status:201,
                 message:'Transaction created',
                 transaction,
             });
         } catch(error) {
             console.log(error)
-            res.status(500).json({
+            return res.status(500).json({
                 status:500,
                 message:'Server error'
             });
@@ -129,6 +129,7 @@ const transactionsController={
         }
     },
     addToCart:async(req,res)=>{
+        console.log(req.params);
         const productId=req.params.id;
         const userId=req.user.id;
         //En el caso que el usuario agregue por primera vez undefined producto a su carro, primero creamos el carro del usuario añadiéndolo al objeto que contiene la totalidad de los carros, el carro del usuario está representado por el id del usuario.
@@ -137,7 +138,6 @@ const transactionsController={
         console.log("eliminado producto"+productId,cart);
         try{
             const product=await findProductByPk(productId);
-            console.log("el tipo de dato de product.price es ",typeof product.price);
             if (!product) return res.status(404).json({
                 status:404,
                 message:'Product not found'
@@ -205,8 +205,9 @@ const transactionsController={
                         return -1
                 }
             });
-            return res.status(200).json({
+            return res.status(201).json({
                 status:201,
+                message: 'product on cart created',
                 cart:editedCart,
                 worth:cartWorth,
             });
@@ -240,18 +241,24 @@ const transactionsController={
                 message:`The product does not exists in your cart. First, you must add it` 
             });
             const oldrequestedQuantity=productOnCart.quantity;
-            if (requestedQuantity>product.stock+oldrequestedQuantity) return res.status(400).json({
-                status:400,
-                message:`We don't have stock enough of the product. You can buy ${product.stock+oldrequestedQuantity} units at most` 
-            });
+            if (requestedQuantity>oldrequestedQuantity) {
+                if (product.status!=='active') return res.status(400).json({
+                    status:400,
+                    message:`We don't have stock enough to add units of the product to your cart` 
+                });
+                if (requestedQuantity>product.stock+oldrequestedQuantity) return res.status(400).json({
+                    status:400,
+                    message:`We don't have stock enough of the product. You can buy ${product.stock+oldrequestedQuantity} units at most` 
+                });
+            };
             productOnCart.quantity= requestedQuantity;
             product.stock+=oldrequestedQuantity-requestedQuantity;
             // El usuario comprador puede solicitar una cantidad de unidades que implique dejar en cero el stock del producto, en este caso corresponde cambiar el status del producto a "inactive". A su vez, en el caso en que solicite una cantidad de unidades del producto menor a las que tienen en el carro, es decir, que su solicitud implique reponer el stock, si el producto estaba inactivo corresponde cambiar su estado a "active".
-            if (product.stock==0) {
-                product.status='inactive'
-            } else if (product.stock>0 && product.status=="inactive") {
-                product.status='active'
-            }
+            if (product.stock===0) {
+                product.status='inactive';
+            } else  {
+                product.status='active';
+            };
             await updateProduct(product,product.id);
             cart=Object.values(cart);
             let cartWorth=cart.reduce((acc,product)=>{
@@ -320,7 +327,7 @@ const transactionsController={
                 status:400,
                 message:`The product does not exists in your cart. First, you must add it` 
             });
-            if (product.stock==0) return res.status(400).json({
+            if (product.status!=='active') return res.status(400).json({
                 status:400,
                 message:`We don't have stock enough to add a unit of the product to your cart` 
             });
@@ -365,6 +372,7 @@ const transactionsController={
             });
             return res.status(200).json({
                 status:200,
+                message: 'product on cart updated',
                 cart:editedCart,
                 worth:cartWorth,
             });

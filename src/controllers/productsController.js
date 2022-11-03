@@ -104,6 +104,7 @@ const productsController={
         };
     },
     getProductDetail:async (req,res)=>{
+        console.log(req.params);
         const {id}=req.params;
         try {
             // Se corroborra que exista el producto sobra el que se aplica la petición GET
@@ -111,6 +112,10 @@ const productsController={
             if (!product) return res.status(404).json({
                 status:404,
                 message:'There is no product whit that id'
+            });
+            if (product.status==='inactive') return res.status(400).json({
+                status:400,
+                message:'That prodoct does not on sale'
             });
             return res.status(200).json({
             status:200,

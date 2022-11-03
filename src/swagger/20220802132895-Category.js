@@ -144,7 +144,7 @@
  *                              name: 'Boats'
  *                              description: ''
  *      responses:
- *          200: 
+ *          201: 
  *              description: OK
  *              content:
  *                  application/json:
@@ -154,7 +154,7 @@
  *                              status:
  *                                  type: integer
  *                                  description: 'Status code'
- *                                  example: 200
+ *                                  example: 201
  *                              message:
  *                                  type: string
  *                                  description: 'successful result'

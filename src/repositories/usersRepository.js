@@ -14,7 +14,7 @@ const usersRepository={
     },
     findUserByPk:async(id)=>{
         const user=await User.findByPk(id,{
-            attributes:['first_name','last_name','email','image'],
+            attributes:['id','first_name','last_name','email','image'],
             include:[
                 {
                     association:'Buys',
@@ -77,20 +77,22 @@ const usersRepository={
         });
         return user;
     },
-    updateUser:async(body,id)=>{
-        await User.update({
-            first_name:body.first_name,
-            last_name:body.last_name,
-            email:body.email,
-            password:body.password,
-            image:body.image
-        },{
-            where:{
-                id
-            }
-        });
-        const user=await User.findByPk(id);
-        return user
+    updateUser:async(user,body)=>{
+        const {
+            first_name,
+            last_name,
+            email,
+            password,
+            image
+        }=body;
+        const update={};
+        if (first_name) update.first_name=first_name;
+        if (last_name) update.last_name=last_name;
+        if (email) update.email=email;
+        if (password) update.password=password;
+        if (image) update.image=image;
+        const userUpdated=await user.update(update);
+        return userUpdated;
     },
     destroyUser:async(id)=>{
         return await User.destroy({

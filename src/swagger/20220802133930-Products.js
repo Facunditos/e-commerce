@@ -60,14 +60,13 @@
  *       required:
  *         - name
  *         - price
- *         - seller_user_id
  *         - category_id
  *         - stock
  *         - status
  *         - image
  *       example:
  *          id: 2
- *          name: 'Awesome Bronze Keyboard'
+ *          name: 'Pelota Mundial De Fútbol Copa Del Mundo'
  *          description: 'Ergonomic executive chair upholstered in bonded black leather and PVC padded seat and back for all-day comfort and support'
  *          price: 3573.63
  *          seller_user_id: 40
@@ -86,7 +85,7 @@
  *  get:
  *      tags: ['Product']       
  *      summary: 'Get a products list'  
- *      description: "Returns a list of five products sorted by page and sales, starting with page 1 and the main product on sales, returns 
+ *      description: "Returns a list of five products sorted by page and sales, starting with page 1 and the top selling products, returns 
  *       the previus and next page links according the page number you're currently on. This list excludes products without stock. This request could be done by any user"
  *      parameters: 
  *          - $ref: '#/components/parameters/Pagination'
@@ -314,28 +313,28 @@
  *                                          first_name: Jeanne
  *                                          second_name: Mueller
  *                                          email: jeanmuller@gmail.com
- *                                          TransactionProduct:
- *                                              transaction_id: 12
- *                                              product_id: 66
- *                                              price: 2622.58
- *                                              quantity: 31
- *                                              createdAt: 2022-05-04T20:03:50.000Z
- *                                              updatedAt: 2022-05-04T20:03:50.000Z
- *                                              deletedAt: null
+ *                                        TransactionProduct:
+ *                                          transaction_id: 12
+ *                                          product_id: 66
+ *                                          price: 2622.58
+ *                                          quantity: 31
+ *                                          createdAt: 2022-05-04T20:03:50.000Z
+ *                                          updatedAt: 2022-05-04T20:03:50.000Z
+ *                                          deletedAt: null
  *                                      - createdAt: 2022-08-09T20:03:50.000Z
  *                                        sale: 900
  *                                        Buyer:
  *                                          first_name: Matteo
  *                                          second_name: Stark
  *                                          email: matteostark@gmail.com
- *                                          TransactionProduct:
- *                                              transaction_id: 9
- *                                              product_id: 66
- *                                              price: 450
- *                                              quantity: 2
- *                                              createdAt: 2022-08-09T20:03:50.000Z
- *                                              updatedAt: 2022-08-09T20:03:50.000Z
- *                                              deletedAt: null
+ *                                        TransactionProduct:
+ *                                          transaction_id: 9
+ *                                          product_id: 66
+ *                                          price: 450
+ *                                          quantity: 2
+ *                                          createdAt: 2022-08-09T20:03:50.000Z
+ *                                          updatedAt: 2022-08-09T20:03:50.000Z
+ *                                          deletedAt: null
  *          404: 
  *              $ref: '#/components/responses/NotFound'
  *          500: 
@@ -347,7 +346,7 @@
  *  get:
  *      tags: ['Product']       
  *      summary: 'Get a products list'  
- *      description: "Returns a list of five products sorted by page and sales, starting with page 1 and the main product on sales, returns 
+ *      description: "Returns a list of five products sorted by page and sales, starting with page 1 and the top selling products, returns 
  *       the previus and next page links according the page number you're currently on. This request could be done by a seller user or the admin user"
  *      security:
  *          - apiKeyAuth: []
@@ -459,31 +458,52 @@
  *  post:
  *      tags: ['Product']       
  *      summary: 'Create a product'
- *      description: 'This request only could be done by the admin'
+ *      description: 'This request only could be done by a seller user'
  *      security:       
  *          - apiKeyAuth: []
  *      requestBody:    
  *          required: true
  *          content:
- *              application/json:
+ *              multipart/form-data:
  *                  schema:
- *                      $ref: '#components/schemas/Product'
- *                  examples:
- *                      successful create:
- *                          value:
- *                              name: 'Camping'
- *                              description: 'Repudiandae magnam nemo libero repellat eos voluptas neque. Iure nostrum ea. Assumenda consectetur est vero fuga eos velit veniam sapiente. Quisquam consectetur corrupti quibusdam voluptatem. Nisi unde consequatur illum suscipit voluptate in. Rerum itaque ut atque minus dolorum harum enim soluta a.'
- *                      successful update without description:
- *                          value:
- *                              name: 'Boats'
- *                              description: ''
- *                      unsuccessful update (the product's name already exists):
- *                          value:
- *                              name: 'Boats'
- *                              description: ''
+ *                      type: object
+ *                      properties:                       
+ *                          name:
+ *                              type: string
+ *                              example: 'Dulce de leche LA SERENISIMA estilo colonial 1 Kg'
+ *                              description: 'unique in the DB'
+ *                          description:
+ *                              type: string
+ *                              description: It could be sended empty and the server will use a default value
+ *                              example: ""
+ *                          price:
+ *                              type: number
+ *                              format: float
+ *                              example: 700 
+ *                          category_id:
+ *                              type: integer
+ *                              example: 10
+ *                              description: category ID, must belong to existing category
+ *                          stock:
+ *                              type: integer
+ *                              example: 15 
+ *                          status:
+ *                              type: string
+ *                              example: active  
+ *                              description: 'It could be active or inactive'
+ *                          image:
+ *                              type: string
+ *                              format: binary
+ *                      required:
+ *                          - name
+ *                          - price
+ *                          - category_id
+ *                          - stock
+ *                          - status
+ *                          - image
  *      responses:
- *          200: 
- *              description: OK
+ *          201: 
+ *              description: Created
  *              content:
  *                  application/json:
  *                      schema:
@@ -492,7 +512,7 @@
  *                              status:
  *                                  type: integer
  *                                  description: 'Status code'
- *                                  example: 200
+ *                                  example: 201
  *                              message:
  *                                  type: string
  *                                  description: 'successful result'
@@ -514,15 +534,16 @@
  *  get:
  *      tags: ['Product']       
  *      summary: 'Get a products list which includes only those products which match the query parameter'  
- *      description: "Returns a list of five products sorted by page, starting with page 1 and returns 
- *       the previus and next page links according the page number you're currently on.  This request could be done by any user"
+ *      description: "Returns a list of five products sorted by page and sales, starting with page 1 and the top selling products, returns 
+ *       the previus and next page links according the page number you're currently on. This request could be done by a seller user or the admin user"
+ *      security:
+ *          - apiKeyAuth: []
  *      parameters: 
+ *          - $ref: '#/components/parameters/SellerId'
+ *          - $ref: '#/components/parameters/SearchByName'
+ *          - $ref: '#/components/parameters/OrderBy'
+ *          - $ref: '#/components/parameters/Order'
  *          - $ref: '#/components/parameters/Pagination'
- *          - in: query
- *            name: name
- *            schema:
- *              type: string
- *            description: 'the past string is used to find specific products whose name include it'
  *      responses:
  *          200: 
  *              description: OK
@@ -550,23 +571,41 @@
  *                                      $ref: '#/components/schemas/Product'    
  *                          example:
  *                              status: 200
- *                              previosPage: '/api/v1/products/sear?page=1'
- *                              nextPage: '/api/v1/products?page=3'
+ *                              previosPage: '/api/v1/me/products/sear?page=1'
+ *                              nextPage: '/api/v1/me/products?page=2'
  *                              count: 7              
  *                              products:
  *                                  - "id": 6
- *                                    "name": "Books"
+ *                                    "name": "red T-shirt"
  *                                    "description": "This product doesn't have a description"
- *                                    "deletedAt": "2022-10-14 18:53:36"
+ *                                    "price": 2320.53
+ *                                    "seller_user_id": 36
+ *                                    "category_id": 12
+ *                                    "stock": 38
+ *                                    "status": "active"
+ *                                    "image": https://ecommerce1287.s3.sa-east-1.amazonaws.com/product-img/product-1663617922368.jpg           
  *                                    "createdAt": "2022-10-14 18:53:36"
- *                                    "updatedAt": "null"
+ *                                    "updatedAt": "2022-10-14 18:53:36"
+ *                                    "deletedAt": null
+ *                                    "sales": 120451.78
  *                                  - "id": 7
- *                                    "name": "Tools"
- *                                    "description": "Iusto et hic deleniti est voluptate. Accusamus sit at consequatur voluptatem dolorum voluptates quia. Natus vero exercitationem temporibus molestiae autem velit architecto. Est quae officiis temporibus ducimus saepe maxime facilis odio. Eius impedit ut sed dolore quisquam aliquid quis est."
- *                                    "deletedAt": "2022-10-14 18:53:36"
+ *                                    "name": "blue T-shirt"
+ *                                    "description": "This product doesn't have a description"
+ *                                    "price": 2320.53
+ *                                    "seller_user_id": 36
+ *                                    "category_id": 12
+ *                                    "stock": 38
+ *                                    "status": "active"
+ *                                    "image": https://ecommerce1287.s3.sa-east-1.amazonaws.com/product-img/product-1663617922362.jpg               
  *                                    "createdAt": "2022-10-14 18:53:36"
- *                                    "updatedAt": "null" 
+ *                                    "updatedAt": "2022-10-14 18:53:36"
+ *                                    "deletedAt": null
+ *                                    "sales": 120451.78
  *          400: 
+ *              $ref: '#/components/responses/BadRequest'
+ *          401: 
+ *              $ref: '#/components/responses/BadRequest'
+ *          403: 
  *              $ref: '#/components/responses/BadRequest'
  *          404: 
  *              $ref: '#/components/responses/NotFound'
@@ -580,7 +619,9 @@
  *  get:
  *      tags: ['Product']       
  *      summary: 'Get a product detail'  
- *      description: "It shows the asocciation with Product model using where clause, status=active. This request could be done by any user"
+ *      description: "It shows the asocciation with many other models. This request could be done by a seller user or the admin user"
+ *      security:
+ *          - apiKeyAuth: []
  *      parameters: 
  *          - $ref: '#/components/parameters/ID'
  *      responses:
@@ -599,29 +640,48 @@
  *                          example:
  *                              status: 200          
  *                              product:
- *                                  "name": "Hoppe"
- *                                  "description": "Hoppe"
- *                                  "Products": 
- *                                      - name: 'Modern Soft Shoes'
- *                                        description: 'New ABC 13 9370, 13.3, 5th Gen CoreA5-8250U, 8GB RAM, 256GB SSD, power UHD Graphics, OS 10 Home, OS Office A & J 2016'
- *                                        price: 6928.19
- *                                        image: "https://loremflickr.com/640/480/animals?2399"
- *                                        Seller: 
- *                                           "first_name": "Chad"
- *                                           "last_name": "Legros"
- *                                           "email": "chadlegros@gmail.com"
- *                                           "image": "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/185.jpg"      
- *                                      - name: 'Tasty Frozen Chairs'
- *                                        description: 'New ABC 13 9370, 13.3, 5th Gen CoreA5-8250U, 8GB RAM, 256GB SSD, power UHD Graphics, OS 10 Home, OS Office A & J 2016'
- *                                        price: 2708.34
- *                                        image: "https://loremflickr.com/640/480/animals?2399"
- *                                        Seller: 
- *                                           "first_name": "Hester"
- *                                           "last_name": "Muller"
- *                                           "email": "chadlegros@gmail.com"
- *                                           "image": "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/185.jpg"                   
- *          400:
- *              $ref: '#/components/responses/BadRequest'
+ *                                  name: Modern Soft Shoes
+ *                                  description: New ABC 13 9370, 13.3, 5th Gen CoreA5-8250U, 8GB RAM, 256GB SSD, power UHD Graphics, OS 10 Home, OS Office A & J 2016
+ *                                  price: 6928.19
+ *                                  stock: 1
+ *                                  status: active
+ *                                  image: https://loremflickr.com/640/480/animals?2399
+ *                                  total sales: 82199.98
+ *                                  Category: 
+ *                                      name: Beauty
+ *                                  Seller: 
+ *                                      first_name: Chad
+ *                                      last_name: Legros
+ *                                      email": cadlegrosgmail.com
+ *                                  Transaction:
+ *                                      - createdAt: 2022-05-04T20:03:50.000Z
+ *                                        sale: 81299.98
+ *                                        Buyer:
+ *                                          first_name: Jeanne
+ *                                          second_name: Mueller
+ *                                          email: jeanmuller@gmail.com
+ *                                        TransactionProduct:
+ *                                          transaction_id: 12
+ *                                          product_id: 66
+ *                                          price: 2622.58
+ *                                          quantity: 31
+ *                                          createdAt: 2022-05-04T20:03:50.000Z
+ *                                          updatedAt: 2022-05-04T20:03:50.000Z
+ *                                          deletedAt: null
+ *                                      - createdAt: 2022-08-09T20:03:50.000Z
+ *                                        sale: 900
+ *                                        Buyer:
+ *                                          first_name: Matteo
+ *                                          second_name: Stark
+ *                                          email: matteostark@gmail.com
+ *                                        TransactionProduct:
+ *                                          transaction_id: 9
+ *                                          product_id: 66
+ *                                          price: 450
+ *                                          quantity: 2
+ *                                          createdAt: 2022-08-09T20:03:50.000Z
+ *                                          updatedAt: 2022-08-09T20:03:50.000Z
+ *                                          deletedAt: null
  *          401: 
  *              $ref: '#/components/responses/Unauthorized'
  *          403: 
@@ -633,7 +693,7 @@
  *  put:
  *      tags: ['Product']       
  *      summary: 'Update a product'
- *      description: 'This request only could be done by the admin'
+ *      description: 'This request only could be done by a seller user'
  *      parameters:
  *          - $ref: '#/components/parameters/ID'
  *      security:
@@ -645,15 +705,59 @@
  *                  schema:
  *                      $ref: '#components/schemas/Product'
  *                  examples:
- *                      successful update (add description):
+ *                      successful update:
  *                          value:
- *                              name: 'Boats'
- *                              description: 'Repudiandae magnam nemo libero repellat eos voluptas neque. Iure nostrum ea. Assumenda consectetur est vero fuga eos velit veniam sapiente. Quisquam consectetur corrupti quibusdam voluptatem. Nisi unde consequatur illum suscipit voluptate in. Rerum itaque ut atque minus dolorum harum enim soluta a.'
- *                      unsuccessful update (the name is short):
+ *                              name: 'Dulce de leche LA SERENISIMA estilo colonial 1 Kg'
+ *                              description: ""
+ *                              price: 700
+ *                              category_id: 10
+ *                              stock: 15
+ *                              status: active
+ *                      unsuccessful update (update status):
  *                          value:
- *                              name: 'Bo'
- *                              description: 'Repudiandae magnam nemo libero repellat eos voluptas neque. Iure nostrum ea. Assumenda consectetur est vero fuga eos velit veniam sapiente. Quisquam consectetur corrupti quibusdam voluptatem. Nisi unde consequatur illum suscipit voluptate in. Rerum itaque ut atque minus dolorum harum enim soluta a.'
- *                          
+ *                              name: ""
+ *                              description: "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen. No sólo sobrevivió 500 años, sino que tambien ingresó como texto de relleno en documentos electrónicos, quedando esencialmente igual al original. Fue popularizado en los 60s con la creación de las hojas 'Letraset', las cuales contenian pasajes de Lorem Ipsum, y más recientemente con software de autoedición, como por ejemplo Aldus PageMaker, el cual incluye versiones de Lorem Ipsum."
+ *                              price: ""
+ *                              category_id: ""
+ *                              stock: ""
+ *                              status: ""
+ *              multipart/form-data:
+ *                  schema:
+ *                      type: object
+ *                      properties:                       
+ *                          name:
+ *                              type: string
+ *                              example: 'Dulce de leche LA SERENISIMA estilo colonial 1 Kg'
+ *                              description: 'unique in the DB'
+ *                          description:
+ *                              type: string
+ *                              description: It could be sended empty and the server will use a default value
+ *                              example: ""
+ *                          price:
+ *                              type: number
+ *                              format: float
+ *                              example: 700 
+ *                          category_id:
+ *                              type: integer
+ *                              example: 10
+ *                              description: category ID, must belong to existing category
+ *                          stock:
+ *                              type: integer
+ *                              example: 15 
+ *                          status:
+ *                              type: string
+ *                              example: active  
+ *                              description: 'It could be active or inactive'
+ *                          image:
+ *                              type: string
+ *                              format: binary
+ *                      required:
+ *                          - name
+ *                          - price
+ *                          - category_id
+ *                          - stock
+ *                          - status
+ *                          - image          
  *      responses:
  *          200: 
  *              description: OK
@@ -686,7 +790,7 @@
  *  delete:
  *      tags: ['Product']       
  *      summary: 'Delete a product'
- *      description: 'This request use the soft delete method and only could be done by the admin'
+ *      description: 'This request use the soft delete method and only could be done by a seller user'
  *      parameters: 
  *          - $ref: '#/components/parameters/ID'
  *      security:       

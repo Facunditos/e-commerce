@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type:DataTypes.STRING(150),
       allowNull:false,
+      unique:true,
       validate:{
         notEmpty:true,
       },
@@ -42,7 +43,6 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.FLOAT(25,2),
       allowNull:false,
       validate:{
-        
         min:0,
       },
     },

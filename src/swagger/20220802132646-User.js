@@ -126,7 +126,33 @@
  *                              "role_id": 3         
  *              multipart/form-data:
  *                  schema:
- *                      $ref: '#components/schemas/User' 
+ *                      type: object
+ *                      properties:                       
+ *                          first_name:
+ *                              type: string
+ *                              example: 'Facundo'
+ *                          last_name:
+ *                              type: string
+ *                              example: 'López Crespo'
+ *                          email:
+ *                              type: string
+ *                              format: email
+ *                              example: 'facundolopezcrespo@hotmail.com'
+ *                          password:
+ *                              type: string
+ *                              example: Facundo1234$
+ *                          role_id:
+ *                              type: integer
+ *                              example: 2
+ *                          image:
+ *                              type: string
+ *                              format: binary
+ *                      required:
+ *                          - first_name
+ *                          - last_name
+ *                          - email
+ *                          - password
+ *                          - role_id
  *      responses:
  *          201: 
  *              description: Created
@@ -491,7 +517,30 @@
  *                              "password": 'Facundo0301$'      
  *              multipart/form-data:
  *                  schema:
- *                      $ref: '#components/schemas/User' 
+ *                      type: object
+ *                      properties:                       
+ *                          first_name:
+ *                              type: string
+ *                              example: 'Fac'
+ *                          last_name:
+ *                              type: string
+ *                              example: 'López Crespo'
+ *                          email:
+ *                              type: string
+ *                              format: email
+ *                              example: 'facundolopezcrespo@hotmail.com'
+ *                          password:
+ *                              type: string
+ *                              example: Facundo1234$
+ *                          image:
+ *                              type: string
+ *                              format: binary
+ *                      required:
+ *                          - first_name
+ *                          - last_name
+ *                          - email
+ *                          - password
+ *                          - role_id
  *      responses:
  *          200: 
  *              description: OK

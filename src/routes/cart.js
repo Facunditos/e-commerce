@@ -15,10 +15,8 @@ const {
     emptyCart
 }=require('../controllers/cartController');
 
-
-
-router.get('/',verifyToken,getCart);
-router.post('/buy',verifyToken,buyCart);
+router.get('/',verifyToken,verifyIsBuyer,getCart);
+router.post('/buy',verifyToken,verifyIsBuyer,buyCart);
 router.post('/:id',verifyToken,verifyIsBuyer,addToCart);
 router.put('/:id',verifyToken,verifyIsBuyer,validateSetQuantity,setQuantity);
 router.put('/:id/increase',verifyToken,verifyIsBuyer,increaseQuantity);

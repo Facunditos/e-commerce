@@ -116,7 +116,7 @@ const usersController={
                 message:'There is no user whit that id'
             });
             // A menos que quien realice la petición sea el usuario administrador, se corroborra que coincida el usuario que realiza la petición y el usuario sobre el que se aplica la petición, 
-            if (userInToken.id!==userInDB.id&&userInToken.Role.name!=="Admin") 
+            if (userInToken.id!==userInDB.id&&userInToken.role_name!=="Admin") 
                 return res.status(403).json({
                     status:403,
                     message:`${req.user.first_name}, you don't have permission to do it`,
@@ -141,7 +141,7 @@ const usersController={
         const userInToken=req.user;
         try {
             // Se corroborra que exista el usuario sobre el que se aplica la petición PUT
-            const userInDB=await findUserByPk(id);
+            let userInDB=await findUserByPk(id);
             if (!userInDB) return res.status(404).json({
                 status:404,
                 message:'There is no user whit that id'
@@ -151,6 +151,21 @@ const usersController={
                     status:403,
                     message:`${req.user.first_name}, you don't have permission to do it`,
             });
+            if (body.email&&userInToken.email!==body.email) {
+                const user=await findUserByEmail(body.email);
+                if (user) return res.status(400).json({
+                    status:400,
+                    errors:{
+                        email:{
+                            msg:'That email already exits',
+                        },
+                    },
+                }); 
+            };
+            if (body.password){
+                body.password=bcryptjs.hashSync(body.password,10);
+            };
+            userInDB=await updateUser(userInDB,body)
             //El usuario que solicita actualizar su registro tiene la opción de cambiar su avatar; si lo hace, en el servidor de AWS, se reemplaza el viejo avatar por el que se envió en la petición, y en la DB, se realiza la actualización correspondiente en el campo "image" ; si no lo hace, continúa con el mismo avatar que arrastraba, sin modificaciones ni en AWS ni en la DB.
             if (req.files) {
                 const bucket="ecommerce1287";
@@ -161,16 +176,16 @@ const usersController={
                 const {image}=req.files;
                 const newKey=`user-img/user-${Date.now()}${path.extname(image.name)}`;
                 await uploadToBucket(bucket,newKey,image);
-                body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
-            } else {
-                body.image=userInDB.image;
-            }
-            body.password=bcryptjs.hashSync(body.password,10);
-            const userUpdated=await updateUser(body,id)
+                body={
+                    image:`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`
+                };
+                userInDB=await updateUser(userInDB,body)
+            } 
+            
             return res.status(200).json({
             status:200,
             message:'User updated',
-            userUpdated
+            userInDB
             });  
         
         } catch(error) {

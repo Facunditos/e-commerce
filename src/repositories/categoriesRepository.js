@@ -72,16 +72,14 @@ const categoriesRepository={
         return category
     },
     updateCategory:async(body,id)=>{
-        await Category.update({
-            name:body.name,
-            description:body.description,
-        },{
-            where:{
-                id
-            }
-        });
-        const category=await Category.findByPk(id);
-        return category
+        const categoryUpdating=await Category.findByPk(id);
+        if (!categoryUpdating) return false 
+        const {name,description}=body;
+        const update={};
+        if (name) update.name=name;
+        if (description) update.description=description;
+        const categoryUpdated=await categoryUpdating.update(update);
+        return categoryUpdated
     },
     destroyCategory:async(id)=>{
         return await Category.destroy({

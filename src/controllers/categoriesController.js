@@ -127,19 +127,28 @@ const categoriesController={
     createCategory:async(req,res)=>{
         const {body}=req;
         try{
+            let category=await findCategoryByName(body.name);
+            if (category) return res.status(400).json({
+                status:400,
+                errors:{
+                    name:{
+                        msg:'That category already exits',
+                    },
+                },
+            }); 
             // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Category", opere la propiedad "defaultValue"
             if (!body.description) {
                 body.description=undefined;
             };
-            const category=await createCategory(body);
-            res.status(201).json({
+            category=await createCategory(body);
+            return res.status(201).json({
                 status:201,
                 message:'Category created',
                 category
             });
         }catch(e){
             console.log(e);
-            res.status(500).json({
+            return res.status(500).json({
                 status:500,
                 message:'Server error'
             })
@@ -149,21 +158,20 @@ const categoriesController={
         const {body}=req;
         const {id}=req.params;
         try{
+            // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Category", opere la propiedad "defaultValue
+            if (!body.description) {
+                body.description="This category doesn't have a description";
+            };
+            const category=await updateCategory(body,id);
             // Se corroborra que exista la categoría sobre la que se aplica la petición PUT
-            const category=await findCategoryByPk(id);
             if (!category) return res.status(404).json({
                 status:404,
                 message:'There is no category whit that id'
             });
-            // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Category", opere la propiedad "defaultValue"
-            if (!body.description) {
-                body.description="This category doesn't have a description";
-            }
-            const categoryUpdated=await updateCategory(body,id);
-            res.status(201).json({
-                status:201,
+            return res.status(200).json({
+                status:200,
                 message:'Category updated',
-                categoryUpdated
+                category
             })
         }catch(e){
             console.log(e);
@@ -171,11 +179,15 @@ const categoriesController={
                 for (const error of e.errors){
                     if (error.type==='unique violation') return res.status(400).json({
                         status:400,
-                        message:'That category already exits'
+                        errors:{
+                            name:{
+                                msg:'That category already exits',
+                            },
+                        },
                     });
                 };
             };
-            res.status(500).json({
+            return res.status(500).json({
                 status:500,
                 message:'Server error'
             })

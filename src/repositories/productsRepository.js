@@ -47,6 +47,7 @@ const productsRepository={
     },
     searchProductsByNameAndOrder:async(name,orderBy,order,offset,sellerId)=>{
         if (orderBy===undefined) orderBy='sales';
+        console.log('order',order);
         if (order===undefined) {
             if (orderBy==='sales') {
                 order='desc';
@@ -54,6 +55,7 @@ const productsRepository={
                 order='asc';
             };
         };
+        
         const allSellers={[Op.gte]:0}
         const oneSeller=sellerId;
         const allStatus=['active','inactive'];
@@ -74,14 +76,13 @@ const productsRepository={
             order:[[orderBy,order]],
             limit:5,
             offset
-            
         });
         return products;
     },
     findProductByPk:async(id)=>{
         const product=await Product.findByPk(id,{
             attributes:{
-                exclude:['id','seller_user_id','category_id','createdAt','updatedAt','deletedAt'],
+                exclude:['category_id','createdAt','updatedAt','deletedAt'],
                 include:[
                     [
                         sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),
@@ -143,22 +144,26 @@ const productsRepository={
         });
         return product
     },
-    updateProduct:async(body,id)=>{
-        let product=await Product.update({
-            name:body.name,
-            description:body.description,
-            price:body.price,
-            category_id:body.category_id,
-            stock:body.stock,
-            status:body.status,
-            image:body.image,
-        },{
-            where:{
-                id
-            }
-        });
-        product=await Product.findByPk(id);
-        return product
+    updateProduct:async(product,body)=>{
+        const {
+            name,
+            description,
+            price,
+            category_id,
+            stock,
+            status,
+            image
+        }=body;
+        const update={};
+        if (name) update.name=name;
+        if (description) update.description=description;
+        if (price) update.price=price;
+        if (category_id) update.category_id=category_id;
+        if (stock) update.stock=stock;
+        if (status) update.status=status;
+        if (image) update.image=image;
+        const productUpdated=await product.update(update);
+        return productUpdated;
     },
     destroyProduct:async(id)=>{
         return await Product.destroy({
