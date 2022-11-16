@@ -159,7 +159,7 @@ const productsRepository={
         if (description) update.description=description;
         if (price) update.price=price;
         if (category_id) update.category_id=category_id;
-        if (stock) update.stock=stock;
+        if (stock || stock===0) update.stock=stock;
         if (status) update.status=status;
         if (image) update.image=image;
         const productUpdated=await product.update(update);

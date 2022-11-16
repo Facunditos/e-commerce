@@ -58,8 +58,6 @@ const transactionsController={
                 count,
                 transactions:rows,
             });
-            //return res.render("transactions",{transactions,sellersGroupedByTransaction,productsCategoriesGroupedByTransaction})
-
         } catch(error) {
             console.log(error);
             return res.status(500).json({

@@ -335,6 +335,8 @@
  *                                          createdAt: 2022-08-09T20:03:50.000Z
  *                                          updatedAt: 2022-08-09T20:03:50.000Z
  *                                          deletedAt: null
+ *          400: 
+ *              $ref: '#/components/responses/BadRequest'
  *          404: 
  *              $ref: '#/components/responses/NotFound'
  *          500: 
@@ -750,14 +752,7 @@
  *                              description: 'It could be active or inactive'
  *                          image:
  *                              type: string
- *                              format: binary
- *                      required:
- *                          - name
- *                          - price
- *                          - category_id
- *                          - stock
- *                          - status
- *                          - image          
+ *                              format: binary      
  *      responses:
  *          200: 
  *              description: OK

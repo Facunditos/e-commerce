@@ -105,14 +105,15 @@ const transactionsController={
                 minimumFractionDigits:2,
                 maximumFractionDigits:2,
             }).format(transaction.worth);
-            for (const detail of transaction.Details) {
-                detail.price=new Intl.NumberFormat(undefined,{
+            for (const detail of transaction.Products) {
+                detail.TransactionProduct.price=new Intl.NumberFormat(undefined,{
                     style:"currency",
                     currency:"ARS",
                     minimumFractionDigits:2,
                     maximumFractionDigits:2,
-                }).format(detail.price);
-                detail.quantity=new Intl.NumberFormat().format(detail.quantity)
+                }).format(detail.TransactionProduct.price);
+                detail.TransactionProduct.quantity=new Intl.NumberFormat().format(detail.TransactionProduct.quantity);
+                
             }
             return res.status(201).json({
                 status:201,
@@ -129,13 +130,11 @@ const transactionsController={
         }
     },
     addToCart:async(req,res)=>{
-        console.log(req.params);
         const productId=req.params.id;
         const userId=req.user.id;
         //En el caso que el usuario agregue por primera vez undefined producto a su carro, primero creamos el carro del usuario añadiéndolo al objeto que contiene la totalidad de los carros, el carro del usuario está representado por el id del usuario.
         req.session.carts[userId]=req.session.carts[userId]||{};
         let cart=req.session.carts[userId];
-        console.log("eliminado producto"+productId,cart);
         try{
             const product=await findProductByPk(productId);
             if (!product) return res.status(404).json({
@@ -161,10 +160,12 @@ const transactionsController={
                 quantity: 1,
                 time:Date.now()
             };
+            const bodyToUpdateProduct={};
             //Por ser adquirida una unidad del producto, corresponde ajustar su stock, y en el caso que el stock ajustado sea igual a cero, debiera también cambiarse el atributo "status" de activo a inactivo. 
             product.stock--;
-            if (product.stock==0) product.status='inactive';
-            await updateProduct(product,product.id);
+            bodyToUpdateProduct.stock=product.stock;
+            if (product.stock===0) bodyToUpdateProduct.status='inactive';
+            await updateProduct(product,bodyToUpdateProduct);
             //Convierto el objeto que representa al carro en un array
             cart=Object.values(cart);
             //Aplico el método reduce para conocer el valor del carro
@@ -241,6 +242,7 @@ const transactionsController={
                 message:`The product does not exists in your cart. First, you must add it` 
             });
             const oldrequestedQuantity=productOnCart.quantity;
+            // esta condición evalúa si se solicita una mayor cantidad de unidades del producto agregado al carro
             if (requestedQuantity>oldrequestedQuantity) {
                 if (product.status!=='active') return res.status(400).json({
                     status:400,
@@ -252,14 +254,16 @@ const transactionsController={
                 });
             };
             productOnCart.quantity= requestedQuantity;
-            product.stock+=oldrequestedQuantity-requestedQuantity;
+            product.stock-=requestedQuantity-oldrequestedQuantity;
+            const bodyToUpdateProduct={};
+            bodyToUpdateProduct.stock=product.stock;
             // El usuario comprador puede solicitar una cantidad de unidades que implique dejar en cero el stock del producto, en este caso corresponde cambiar el status del producto a "inactive". A su vez, en el caso en que solicite una cantidad de unidades del producto menor a las que tienen en el carro, es decir, que su solicitud implique reponer el stock, si el producto estaba inactivo corresponde cambiar su estado a "active".
             if (product.stock===0) {
-                product.status='inactive';
+                bodyToUpdateProduct.status='inactive';
             } else  {
-                product.status='active';
+                bodyToUpdateProduct.status='active';
             };
-            await updateProduct(product,product.id);
+            await updateProduct(product,bodyToUpdateProduct);
             cart=Object.values(cart);
             let cartWorth=cart.reduce((acc,product)=>{
                 return acc+product.price*product.quantity;
@@ -297,6 +301,7 @@ const transactionsController={
             });
             return res.status(200).json({
                 status:200,
+                message: 'product on cart updated',
                 cart:editedCart,
                 worth:cartWorth,
             });
@@ -333,8 +338,11 @@ const transactionsController={
             });
             productOnCart.quantity++;
             product.stock--;
-            if (product.stock==0) product.status='inactive';
-            await updateProduct(product,product.id);
+            const bodyToUpdateProduct={};
+            bodyToUpdateProduct.stock=product.stock;
+            // Corresponde modificar el status del producto en caso que el stock quedase en cero por agregar una unidad del producto al carro.
+            if (product.stock===0) bodyToUpdateProduct.status='inactive';
+            await updateProduct(product,bodyToUpdateProduct);
             cart=Object.values(cart);
             let cartWorth=cart.reduce((acc,product)=>{
                 return acc+product.price*product.quantity;
@@ -409,8 +417,11 @@ const transactionsController={
             });
             productOnCart.quantity--;
             product.stock++;
-            if (product.stock==1) product.status="active";
-            await updateProduct(product,product.id);
+            const bodyToUpdateProduct={};
+            bodyToUpdateProduct.stock=product.stock;
+            // Corresponde modificar el status del producto en caso que el stock quedase en uno por devolver una unidad del producto.
+            if (product.stock===1) bodyToUpdateProduct.status='active';
+            await updateProduct(product,bodyToUpdateProduct);
             cart=Object.values(cart);
             let cartWorth=cart.reduce((acc,product)=>{
                 return acc+product.price*product.quantity;
@@ -448,6 +459,7 @@ const transactionsController={
             });
             return res.status(200).json({
                 status:200,
+                message: 'product on cart updated',
                 cart:editedCart,
                 worth:cartWorth,
             });
@@ -478,12 +490,14 @@ const transactionsController={
                 status:400,
                 message:`The product does not exists in your cart` 
             });
-            //Para quintar el producto del carro, se declara "undefined" el valor de la propiedad que representa a este producto, ya que el objeto global que representa al carro no incluye una propiedad cuyo valor no esté definido. 
+            //Para quitar el producto del carro, se declara "undefined" el valor de la propiedad que representa a este producto, ya que el objeto global que representa al carro no incluye a una propiedad cuyo valor no esté definido. 
             cart[productId]=undefined;
-            console.log("cartObject",cart);
             product.stock+=productOnCart.quantity;
-            if (product.stock==productOnCart.quantity) product.status="active";
-            await updateProduct(product,product.id)
+            const bodyToUpdateProduct={};
+            bodyToUpdateProduct.stock=product.stock;
+            // Corresponde modificar el status del producto en caso que el stock haya estado en cero.
+            if (product.stock===productOnCart.quantity) bodyToUpdateProduct.status='active';
+            await updateProduct(product,bodyToUpdateProduct);
             cart=Object.values(cart);
             let editedCart=cart.filter((product)=>{
                 return product
@@ -493,7 +507,6 @@ const transactionsController={
             },0);
             
             const editedCartWorth=new Intl.NumberFormat(undefined,{style:"currency",currency:"ARS"}).format(cartWorth);
-            console.log("cartWorth",cartWorth);
             editedCart=editedCart.map((product)=>{
                 const editedProduct= {
                     ...product,
@@ -526,6 +539,7 @@ const transactionsController={
             });
             return res.status(200).json({
                 status:200,
+                message: 'product remove from cart',
                 cart:editedCart.length>0?editedCart:"The cart is empty",
                 worth:cartWorth>0?editedCartWorth:undefined,
             });
@@ -543,14 +557,17 @@ const transactionsController={
         try{
             if (!cart) return res.status(400).json({
                 status:400,
-                message:'The product does not exists in your cart' 
+                message:'The cart does not exist' 
             });
             cart=Object.values(cart);
             for (const productOnCart of cart) {
                 const product=await findProductByPk(productOnCart.id);
-                if (product.status=="inactive") product.status='active';
                 product.stock+=productOnCart.quantity;
-                await updateProduct(product,product.id)
+                const bodyToUpdateProduct={};
+                bodyToUpdateProduct.stock=product.stock;
+                // Corresponde modificar el status del producto en caso que el stock haya estado en cero.
+                if (product.stock===productOnCart.quantity) bodyToUpdateProduct.status='active';
+                await updateProduct(product,bodyToUpdateProduct);
             };
             //Se vacía el carro. 
             req.session.carts[userId]= {};

@@ -1,5 +1,5 @@
 const {Transaction}=require("../database/models/index");
-
+const sequelize=require("sequelize");
 const transactionsRepository={
     getAllTransactions:async(offset)=>{
         const transactions=await Transaction.findAndCountAll({
@@ -22,7 +22,7 @@ const transactionsRepository={
     },
     findTransactionByPk:async(id)=>{
         const transaction=await Transaction.findByPk(id,{
-            attributes:['worth','createdAt'],
+            attributes:['id','worth','createdAt'],
             include:[
                 {
                     association:'Buyer',
@@ -30,7 +30,15 @@ const transactionsRepository={
                 },
                 {
                     association:'Products',
-                    attributes:['id','price','name'],
+                    attributes:{
+                        include:[
+                            [
+                                sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Products.id AND transaction_product.transaction_id=Transaction.id)'),
+                                'subtotal'
+                            ],
+                        ],
+                        exclude:['price','description','seller_user_id','category_id','stock','status','image','createdAt','updatedAt','deletedAt']
+                    },
                     include:[
                         {
                             association:"Seller",
@@ -39,7 +47,7 @@ const transactionsRepository={
                         {
                             association:"Category",
                             attributes:['name'],
-                        }
+                        },
                     ]
                 },
             ],

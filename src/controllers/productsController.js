@@ -115,7 +115,7 @@ const productsController={
             });
             if (product.status==='inactive') return res.status(400).json({
                 status:400,
-                message:'That prodoct does not on sale'
+                message:'That product is not on sale'
             });
             return res.status(200).json({
             status:200,

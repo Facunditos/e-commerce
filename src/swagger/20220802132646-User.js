@@ -521,7 +521,7 @@
  *                      properties:                       
  *                          first_name:
  *                              type: string
- *                              example: 'Fac'
+ *                              example: 'Facundo'
  *                          last_name:
  *                              type: string
  *                              example: 'López Crespo'
@@ -535,12 +535,6 @@
  *                          image:
  *                              type: string
  *                              format: binary
- *                      required:
- *                          - first_name
- *                          - last_name
- *                          - email
- *                          - password
- *                          - role_id
  *      responses:
  *          200: 
  *              description: OK
