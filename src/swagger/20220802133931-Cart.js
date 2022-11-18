@@ -353,8 +353,8 @@
  * /api/v1/me/cart/buy:
  *  post:
  *      tags: ['Cart']       
- *      summary: 'Make the transaction'
- *      description: 'This request only could be done by a buyer user'
+ *      summary: 'Buy the cart'
+ *      description: 'This request only could be done by a buyer user so as to create a transaction'
  *      security:       
  *          - apiKeyAuth: []
  *      responses:

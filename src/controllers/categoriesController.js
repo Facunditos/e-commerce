@@ -23,8 +23,9 @@ const categoriesController={
             message:"That page does't exist",
         });
         page=parseInt(page);
+        const offset=5*(page-1)
         try{
-            const results=await getAllCategories(5*(page-1));
+            const results=await getAllCategories(offset);
             count=results.count;
             rows=results.rows;
             if (count==0) return res.status(404).json({
@@ -70,8 +71,9 @@ const categoriesController={
             message:"That page does't exist",
         });
         page=parseInt(page);
+        const offset=5*(page-1)
         try{
-            const results=await searchCategoriesByName(name,5*(page-1));
+            const results=await searchCategoriesByName(name,offset);
             count=results.count;
             rows=results.rows;
             if (count==0) return res.status(404).json({

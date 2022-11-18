@@ -26,8 +26,9 @@ const usersController={
             message:"That page does't exist",
         });
         page=parseInt(page);
+        const offset=5*(page-1)
         try{
-            const results=await getAllUsers(5*(page-1));
+            const results=await getAllUsers(offset);
             count=results.count;
             rows=results.rows;
             if (count==0) return res.status(404).json({
@@ -73,9 +74,10 @@ const usersController={
             message:"That page does't exist",
         });
         page=parseInt(page);
+        const offset=5*(page-1)
         try{
             // Únicamente el usuario administrador puede buscar usuarios por email, a su vez, para la búsqueda se hace uso del operador "like", que permite especificar la condición que debiera cumplirse en la búsqued, se hace uso del comodín "%" para evitar búsquedas restrictivas. La condición de búsqueda es especificada como query de la petición. En el resultado de la búsqueda se proporionan los id de las transacciones en las que hayan involucrado los usuarios, en el caso de los usuarios compradores, y los id de los productos a la venta, en el caso de los usuarios vendedores. Con los respectivos id, pueden realizarse las correspondientes peticiones para conocer el detalle de una transacción y también el historial de venta de un producto.
-            const results=await searchUsersByEmail(email,5*(page-1));
+            const results=await searchUsersByEmail(email,offset);
             count=results.count;
             rows=results.rows;
             if (count==0) return res.status(404).json({

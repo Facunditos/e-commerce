@@ -25,17 +25,18 @@ const transactionsController={
             message:"That page does't exist",
         });
         page=parseInt(page);
+        const offset=5*(page-1)
         try{
             /* return res.render("transactions",{transactions}); */
             //La clave count almacena la cantidad de transacciones encontradas para la query especificada, sin tener en cuenta si se indicó limitar la cantidad de registros devueltos. La clase rows almacena el array de transacciones que se quieren mostrar. 
             let count;
             let rows;
-            if (user.role_name=="Admin") {
-                const results=await getAllTransactions(5*(page-1));
+            if (user.role_name==="Admin") {
+                const results=await getAllTransactions(offset);
                 count=results.count;
                 rows=results.rows;
             } else {
-                const results=await getAllTransactionsByBuyer(user.id);
+                const results=await getAllTransactionsByBuyer(user.id,offset);
                 count=results.count;
                 rows=results.rows;
             };

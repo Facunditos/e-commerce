@@ -10,19 +10,21 @@ const transactionsRepository={
         });
         return transactions
     },
-    getAllTransactionsByBuyer:async(buyer_user_id)=>{
+    getAllTransactionsByBuyer:async(buyer_user_id,offset)=>{
         const transactions=await Transaction.findAndCountAll({
             where:{
                 buyer_user_id
             },
             attributes:["id","worth",["createdAt","purchase date"]],
             order:[['createdAt','DESC']],
+            limit:5,
+            offset
         });
         return transactions
     },
     findTransactionByPk:async(id)=>{
         const transaction=await Transaction.findByPk(id,{
-            attributes:['id','worth','createdAt'],
+            attributes:['id','buyer_user_id','worth','createdAt'],
             include:[
                 {
                     association:'Buyer',
