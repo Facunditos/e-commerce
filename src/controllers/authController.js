@@ -84,7 +84,7 @@ const authController={
             const payload=user;
             const token=jwt.sign(
                 {payload},
-                process.env.SECRETORPRIVATEKEY,
+                process.env.JWT_PRIVATE_KEY,
                 {
                   expiresIn: "8h",
                 },

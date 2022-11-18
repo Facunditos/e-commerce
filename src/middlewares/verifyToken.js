@@ -3,7 +3,7 @@ const jwt=require("jsonwebtoken")
 
 const verifyToken=(req,res,next)=> {
     const {token}=req.headers;
-    jwt.verify(token,process.env.SECRETORPRIVATEKEY,(error,resolve)=>{
+    jwt.verify(token,process.env.JWT_PRIVATE_KEY,(error,resolve)=>{
         if (error) {
             return res.status(401).json({
                 status:401,

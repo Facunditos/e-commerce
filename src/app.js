@@ -30,7 +30,7 @@ app.use(fileUpload({
     debug:true
 }));
 app.use(session({
-    secret:process.env.SECRET,
+    secret:process.env.SESSION_SECRET,
     saveUninitialized:true,
     resave:true
 }));
