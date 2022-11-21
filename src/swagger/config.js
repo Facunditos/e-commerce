@@ -152,7 +152,7 @@ const swaggerSpec={
         },
         servers:[
             {
-                url:'http://localhost:3030'
+                url:'http://ec2-52-67-178-145.sa-east-1.compute.amazonaws.com:3030/'
             }
             //corresponde indicar el servidor donde se aloja la apps
         ]
