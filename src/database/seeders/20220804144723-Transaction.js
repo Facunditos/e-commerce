@@ -116,19 +116,19 @@ module.exports = {
     })
 
     await queryInterface.bulkInsert(
-      'transactions',
+      'Transactions',
       transactionsList, 
       {}
     );
     await queryInterface.bulkInsert(
-      'transaction_product',
+      'Transaction_Product',
       transactionsProductsList, 
       {}
     ); 
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('transaction_product', null, {});
-    await queryInterface.bulkDelete('transactions', null, {});
+    await queryInterface.bulkDelete('Transaction_Product', null, {});
+    await queryInterface.bulkDelete('Transactions', null, {});
   }
 };

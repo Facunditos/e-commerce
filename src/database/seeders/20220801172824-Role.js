@@ -15,13 +15,13 @@ const rolesList=
         });
 module.exports = {
   async up (queryInterface, Sequelize) {
-     await queryInterface.bulkInsert('roles', 
+     await queryInterface.bulkInsert('Roles', 
      rolesList
      , {});
    
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('roles', null, {});
+    await queryInterface.bulkDelete('Roles', null, {});
   }
 };

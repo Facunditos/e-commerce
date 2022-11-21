@@ -28,14 +28,14 @@ categoriesList.forEach((category,index)=>{
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert(
-      'categories',
+      'Categories',
       uniquesCategoriesList, 
       {}
     );
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('categories', null, {});
+    await queryInterface.bulkDelete('Categories', null, {});
     
   }
 };

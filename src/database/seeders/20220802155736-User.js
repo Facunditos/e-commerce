@@ -42,14 +42,14 @@ usersList.forEach((user,index)=>{
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert(
-      'users',
+      'Users',
       uniquesUsersList, 
       {}
     );
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('users', null, {});
+    await queryInterface.bulkDelete('Users', null, {});
     
   }
 };
