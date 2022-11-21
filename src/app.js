@@ -49,7 +49,9 @@ app.use('/api/v1/me/transactions',transactionsRouter);
 
 app.use('/api/v1/doc',swaggerUI.serve,swaggerUI.setup(swaggerJsDoc(swaggerSpec)));
 const router=express.Router();
+app.use('/',router.get("/",(req,res)=>res.send('Hola Mundo')));
 app.use('/',router.get('/view',(req,res)=>res.render('form')));
+
 app.use('/',router.post('/recieveFormPOST',(req,res)=>{
     res.json(req.body);
 }));
