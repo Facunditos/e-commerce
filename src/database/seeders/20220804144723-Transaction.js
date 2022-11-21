@@ -28,8 +28,6 @@ module.exports = {
     const transactionsList=Array(transactionsAmount)
     .fill(0)
     .map((transaction,index)=>{
-      
-      
         return {
         buyer_user_id:assignRandomOddIntegerBetween(3,usersList.length),
         worth:undefined,
@@ -118,20 +116,19 @@ module.exports = {
     })
 
     await queryInterface.bulkInsert(
-      'Transactions',
+      'transactions',
       transactionsList, 
       {}
     );
     await queryInterface.bulkInsert(
-      'Transaction_Product',
+      'transaction_product',
       transactionsProductsList, 
       {}
     ); 
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Transactions', null, {});
-    await queryInterface.bulkDelete('Transaction_Product', null, {});
-    
+    await queryInterface.bulkDelete('transaction_product', null, {});
+    await queryInterface.bulkDelete('transactions', null, {});
   }
 };

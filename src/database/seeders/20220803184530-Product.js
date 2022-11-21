@@ -38,17 +38,24 @@ module.exports = {
         status: 'active',
         image:faker.image.animals(undefined,undefined,true),
         createdAt:faker.date.recent(365*2),
-          updatedAt:undefined,
-          deletedAt:null
+        updatedAt:undefined,
+        deletedAt:null
       }
-    })
-    .map((product)=>{
+    });
+    //Se aplica un forEach para: primero, asignar al updatedAt la misma fecha del creteadAt; y segundo, para eliminar aquellos productos con nombre repetido de manetal tal de evitarse que sea violada la contraint unique key aplicada sobre la column name 
+    const uniquesProductsList=[];
+    //Se aplica un forEach para: primero, eliminar aquellos productos con nombre repetido de manetal tal de evitarse que sea violada la constraint unique key aplicada sobre la column name; segundo, editar la descripción en caso que el id sea par; y tercero, asignar al updatedAt la misma fecha del creteadAt 
+    productsList.forEach((product,index)=>{
+      const productOnArray=uniquesProductsList.filter(productOnListFiltered=>productOnListFiltered.name===product.name) 
+      const isUnique=productOnArray.length===0?true:false  
+      if (isUnique){
         product.updatedAt=product.createdAt;
-        return product 
+        uniquesProductsList.push(product)
+      };
     });
     await queryInterface.bulkInsert(
       'Products',
-      productsList, 
+      uniquesProductsList, 
       {}
     );
   },

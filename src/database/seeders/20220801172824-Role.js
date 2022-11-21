@@ -15,18 +15,13 @@ const rolesList=
         });
 module.exports = {
   async up (queryInterface, Sequelize) {
-     await queryInterface.bulkInsert('Roles', 
+     await queryInterface.bulkInsert('roles', 
      rolesList
      , {});
    
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
+    await queryInterface.bulkDelete('roles', null, {});
   }
 };
