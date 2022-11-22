@@ -47,7 +47,7 @@ const usersRepository={
             attributes:{
                 include:[
                     [
-                        Sequelize.literal('(select name from roles where roles.id=User.role_id)'),
+                        Sequelize.literal('(select name from Roles where Roles.id=User.role_id)'),
                         'role_name'
                     ],
                 ],

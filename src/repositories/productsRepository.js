@@ -15,7 +15,7 @@ const productsRepository={
             attributes:{
                 include:[
                     [
-                        sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),
+                        sequelize.literal('(SELECT sum(quantity*price) FROM Transaction_Product WHERE Transaction_Product.product_id = Product.id)'),
                         'sales'
                     ]
                 ],
@@ -36,8 +36,8 @@ const productsRepository={
                 "name",
                 "price",
                 'image',
-                [sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'), 'sales'],
-                [sequelize.literal('(SELECT name FROM categories WHERE categories.id = Product.category_id)'), 'category'],
+                [sequelize.literal('(SELECT sum(quantity*price) FROM Transaction_Product WHERE Transaction_Product.product_id = Product.id)'), 'sales'],
+                [sequelize.literal('(SELECT name FROM Categories WHERE Categories.id = Product.category_id)'), 'category'],
             ],
             order:[sequelize.literal('category'),[sequelize.literal('sales'),'desc']],
             limit:5,
@@ -68,7 +68,7 @@ const productsRepository={
             attributes:{
                 include:[
                     [
-                        sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),
+                        sequelize.literal('(SELECT sum(quantity*price) FROM Transaction_Product WHERE Transaction_Product.product_id = Product.id)'),
                         'sales'
                     ],
                 ],
@@ -85,7 +85,7 @@ const productsRepository={
                 exclude:['category_id','createdAt','updatedAt','deletedAt'],
                 include:[
                     [
-                        sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id)'),
+                        sequelize.literal('(SELECT sum(quantity*price) FROM Transaction_Product WHERE Transaction_Product.product_id = Product.id)'),
                         'total sales'
                     ],
                 ]               
@@ -105,7 +105,7 @@ const productsRepository={
                         exclude:['id','buyer_user_id','worth','deletedAt','updatedAt'],
                         include:[
                             [
-                                sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Product.id AND transaction_product.transaction_id=Transactions.id)'),
+                                sequelize.literal('(SELECT sum(quantity*price) FROM Transaction_Product WHERE Transaction_Product.product_id = Product.id AND Transaction_Product.transaction_id=Transactions.id)'),
                                 'sale'
                             ],
                         ]

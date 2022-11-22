@@ -35,7 +35,7 @@ const transactionsRepository={
                     attributes:{
                         include:[
                             [
-                                sequelize.literal('(SELECT sum(quantity*price) FROM transaction_product WHERE transaction_product.product_id = Products.id AND transaction_product.transaction_id=Transaction.id)'),
+                                sequelize.literal('(SELECT sum(quantity*price) FROM Transaction_Product WHERE Transaction_Product.product_id = Products.id AND Transaction_Product.transaction_id=Transaction.id)'),
                                 'subtotal'
                             ],
                         ],
