@@ -337,7 +337,7 @@
  *                              message:
  *                                  type: string
  *                                  description: 'successful result'
- *                                  example: 'The cart was emptied'  
+ *                                  example: 'The cart is emptied'  
  *          400:
  *              $ref: '#/components/responses/BadRequest'
  *          401: 
