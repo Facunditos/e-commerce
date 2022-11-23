@@ -33,7 +33,7 @@ const transactionsController={
         });
         //Se convierte el objeto en un array que contiene por cada elemento los productos agregados al carro
         cart=Object.values(cart);
-        if (cart.length==0) return res.status(400).json({
+        if (cart.length==0) return res.status(200).json({
             status:200,
             message:'The cart is empty' 
         });
