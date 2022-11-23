@@ -53,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'TransactionProduct',
-    tableName:'transaction_product',
+    tableName:'Transaction_Product',
     paranoid:true
   });
   return TransactionProduct;
