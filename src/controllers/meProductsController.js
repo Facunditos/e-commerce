@@ -207,7 +207,6 @@ const meProductsController={
         const userInToken=user;
         try{
             let product=await findProductByPk(id);
-            const oldimage=product.image
             // Se corroborra que exista el producto sobre el que se aplica la petición PUT
             if (!product) return res.status(404).json({
                 status:404,
@@ -222,22 +221,19 @@ const meProductsController={
             if (!body.description) {
                 body.description="This product does not have a description";
             };
-            product=await updateProduct(product,body);
-            
             //El usuario que solicita actualizar el producto tiene la opción de cambiar la foto del producto; si lo hace, en el servidor de AWS, se reemplaza la vieja foto por la que se envió en la petición; y en la DB, se realiza la actualización correspondiente en el campo "image" ; si no lo hace, continúa con la misma foto que arrastraba, sin modificaciones ni en AWS ni en la DB.
             if (req.files) {
                 const bucket="ecommerce1287";
+                const {image}=req.files;
+                const newKey=`product-img/product-${Date.now()}${path.extname(image.name)}`;
+                body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
+                await uploadToBucket(bucket,newKey,image);
+                const oldimage=product.image;
                 const oldimageArray=oldimage.split(".com/");
                 const oldKey=oldimageArray[1];
                 await deleteFromBucket(bucket,oldKey);
-                const {image}=req.files;
-                const newKey=`product-img/product-${Date.now()}${path.extname(image.name)}`;
-                body={
-                    image:`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`
-                };
-                product=await updateProduct(product,body);
-                await uploadToBucket(bucket,newKey,image);
             };
+            product=await updateProduct(product,body);
             return res.status(200).json({
                 status:200,
                 message:'Product updated',

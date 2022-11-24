@@ -167,25 +167,22 @@ const usersController={
             if (body.password){
                 body.password=bcryptjs.hashSync(body.password,10);
             };
-            userInDB=await updateUser(userInDB,body)
             //El usuario que solicita actualizar su registro tiene la opción de cambiar su avatar; si lo hace, en el servidor de AWS, se reemplaza el viejo avatar por el que se envió en la petición, y en la DB, se realiza la actualización correspondiente en el campo "image" ; si no lo hace, continúa con el mismo avatar que arrastraba, sin modificaciones ni en AWS ni en la DB.
             if (req.files) {
                 const bucket="ecommerce1287";
-                const defaultUserImage="https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png";
-                if (userInDB.image!==defaultUserImage){
-                    const oldimage=userInDB.image
-                    const oldimageArray=oldimage.split(".com/");
-                    const oldKey='ada';
-                    await deleteFromBucket(bucket,oldKey);
-                };
                 const {image}=req.files;
                 const newKey=`user-img/user-${Date.now()}${path.extname(image.name)}`;
                 await uploadToBucket(bucket,newKey,image);
-                body={
-                    image:`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`,
+                body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${newKey}`;
+                const defaultUserImage="https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png";
+                if (userInDB.image!==defaultUserImage){
+                    const oldimage=userInDB.image;
+                    const oldimageArray=oldimage.split(".com/");
+                    const oldKey=oldimageArray[1];
+                    await deleteFromBucket(bucket,oldKey);
                 };
-                userInDB=await updateUser(userInDB,body)
             };
+            userInDB=await updateUser(userInDB,body);
             return res.status(200).json({
             status:200,
             message:'User updated',
