@@ -67,7 +67,7 @@ const authController={
                 status:404,
                 errors:{
                     email:{
-                        msg:'There is a mistake in your email',
+                        msg:"There is a mistake in your email. You have to create an account if you haven't done it",
                     },
                 },
             });
