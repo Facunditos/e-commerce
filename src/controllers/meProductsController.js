@@ -7,6 +7,7 @@ const {
     createProduct,
     updateProduct,
     destroyProduct,
+    restoreProduct
 }=require("../repositories/productsRepository");
 const {
     findCategoryByPk
@@ -159,6 +160,7 @@ const meProductsController={
     },
     createProduct:async(req,res)=>{
         const {body,user,files}=req;
+        const bucket="ecommerce1287";
         try{
             let product=await findProductByName(body.name);
             if (product) return res.status(400).json({
@@ -180,7 +182,6 @@ const meProductsController={
             });    
             body.seller_user_id=user.id;
             const imageUpload=files.image;
-            const bucket="ecommerce1287";
             const key=`product-img/product-${Date.now()}${path.extname(imageUpload.name)}`;
             body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${key}`;
             // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Product", opere la propiedad "defaultValue"
@@ -192,13 +193,31 @@ const meProductsController={
                 message:'Product created',
                 product
             })
-        }catch(e){
-            console.log(e);
-            return res.status(500).json({
+        }catch(error){
+            
+            // Como está implementado el soft delete se hace necesario contemplar la posibilidad de que el usuario que se registra ya se encuentre en la base de datos, en este caso corresponde cambiar a null el valor del atributo deletedAt 
+            if (error.name==='SequelizeUniqueConstraintError') {
+                await restoreProduct(body.name);   
+                let restoredProduct=await findProductByName(body.name);
+                console.log('restoresProduct',restoredProduct);
+                const oldimage=restoredProduct.image;
+                const oldimageArray=oldimage.split(".com/");
+                const oldKey=oldimageArray[1];
+                await deleteFromBucket(bucket,oldKey);
+                restoredProduct=await updateProduct(restoredProduct,body);
+                return res.status(201).json({
+                status:201,
+                message:'Product restored and updated',
+                restoredProduct,
+                });
+            }else {
+                console.log(error);
+                return res.status(500).json({
                 status:500,
                 message:'Server error'
-            })
-        }
+                });
+            };
+        };
     },
     updateProduct:async(req,res)=>{
         const {user}=req;
@@ -239,9 +258,8 @@ const meProductsController={
                 message:'Product updated',
                 product
             })
-        }catch(e){
-            console.log(e);
-            if (e.name==='SequelizeUniqueConstraintError') return res.status(400).json({
+        }catch(error){
+            if (error.name==='SequelizeUniqueConstraintError') return res.status(400).json({
                     status:400,
                     errors:{
                         name:{
@@ -249,7 +267,7 @@ const meProductsController={
                         },
                     },
             });
-            if (e.name==='SequelizeForeignKeyConstraintError') return res.status(400).json({
+            if (error.name==='SequelizeForeignKeyConstraintError') return res.status(400).json({
                 status:400,
                 errors:{
                     category_id:{
@@ -257,11 +275,12 @@ const meProductsController={
                     },
                 },
             });
+            console.log(error);
             return res.status(500).json({
                 status:500,
                 message:'Server error'
             })
-        }
+        };
     },
     deleteProduct:async(req,res)=>{
         const {id}=req.params;

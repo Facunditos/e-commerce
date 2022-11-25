@@ -123,7 +123,6 @@ const productsRepository={
     },
     findProductByName:async(name)=>{
         const product=await Product.findOne({
-            attributes:['name'],
             where:{
                 name
             }
@@ -171,6 +170,13 @@ const productsRepository={
                 id
             }
         });
+    },
+    restoreProduct:async(name)=>{
+        return await Product.restore({
+            where:{
+                name
+            }
+        })
     },
 };
 

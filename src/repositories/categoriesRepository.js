@@ -22,6 +22,7 @@ const categoriesRepository={
     findCategoryByPk:async(id)=>{
         const category=await Category.findByPk(id,{
             attributes:[
+                'id',
                 'name',
                 'description',
             ],
@@ -71,14 +72,12 @@ const categoriesRepository={
         });
         return category
     },
-    updateCategory:async(body,id)=>{
-        const categoryUpdating=await Category.findByPk(id);
-        if (!categoryUpdating) return false 
+    updateCategory:async(category,body)=>{
         const {name,description}=body;
         const update={};
         if (name) update.name=name;
         if (description) update.description=description;
-        const categoryUpdated=await categoryUpdating.update(update);
+        const categoryUpdated=await category.update(update);
         return categoryUpdated
     },
     destroyCategory:async(id)=>{
@@ -87,6 +86,13 @@ const categoriesRepository={
                 id
             }
         });
+    },
+    restoreCategory:async(name)=>{
+        return await Category.restore({
+            where:{
+                name
+            }
+        })
     },
 }
 

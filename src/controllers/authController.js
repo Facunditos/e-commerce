@@ -12,6 +12,7 @@ const {
     destroyUser,
     restoreUser,
 }=require("../repositories/usersRepository");
+const {deleteFromBucket}=require("../services/AWS_S3")
 
 const bcryptjs=require("bcryptjs");
 const jwt=require("jsonwebtoken");
@@ -20,6 +21,7 @@ const path=require("path");
 const authController={
     registerUser:async(req,res)=>{
         const {body}=req;
+        const bucket="ecommerce1287";
         //Aquellos usuarios que tienen el rol como administrador, deben ser incluidos en la lista de usuarios administradores, pues para asignarle este rol, se consulta si el usuario forma parte de esta lista, en caso que así sea se cambia el valor de la propiedad "role_id" que viene del body por el número  el número 1 -se definió en la tabla roles que el id 1 es el que corresponde para el usuario administrador-. 
         const adminUsers=["ecommerce1287@gmail.com"];
         try {
@@ -35,7 +37,6 @@ const authController={
             //En el caso que el usuario decida subir una imagen como avatar, ésta se almacena en el bucket de Amazon. Si no sube ninguna imagen, se le asigna el avatar anónimo.
             if (req.files) {
                 const {image}=req.files;
-                const bucket="ecommerce1287";
                 const key=`user-img/user-${Date.now()}${path.extname(image.name)}`;
                 await uploadToBucket(bucket,key,image);
                 body.image=`https://ecommerce1287.s3.sa-east-1.amazonaws.com/${key}`;
@@ -50,22 +51,32 @@ const authController={
                 newUser
             });
         } catch(error) {
-            console.log(error);
             // Como está implementado el soft delete se hace necesario contemplar la posibilidad de que el usuario que se registra ya se encuentre en la base de datos, en este caso corresponde cambiar a null el valor del atributo deletedAt 
             if (error.name==='SequelizeUniqueConstraintError') {
-                const restoredUser=await restoreUser(body.email)
+                await restoreUser(body.email);   
+                let restoredUser=await findUserByEmail(body.email);
+                const defaultUserImage="https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png";
+                if (restoredUser.image!==defaultUserImage) {
+                    const oldimage=restoredUser.image;
+                    const oldimageArray=oldimage.split(".com/");
+                    const oldKey=oldimageArray[1];
+                    await deleteFromBucket(bucket,oldKey);
+                };
+                if (!body.image) body.image="https://ecommerce1287.s3.sa-east-1.amazonaws.com/user-img/user-anonymous.png";
+                restoredUser=await updateUser(restoredUser,body);
                 return res.status(201).json({
                 status:201,
-                message:'User restored',
-                restoredUser
+                message:'User restored and updated',
+                restoredUser,
                 });
-            }
-            return res.status(500).json({
+            } else {            
+                console.log(error);
+                return res.status(500).json({
                 status:500,
                 message:'Server error'
-            });
-            
-        }
+                });
+            };
+        };
     },
     loginUser:async(req,res)=>{
         try {

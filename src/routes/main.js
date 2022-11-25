@@ -1,8 +1,6 @@
 const express=require('express');
 const router=express.Router();
-const main=require("../controllers/mainController");
-
-
-router.get('/',main);
-
+router.get('/',(req,res)=>{
+    res.render('index',{title:'E-commerce'})
+});
 module.exports=router

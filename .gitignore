@@ -2,5 +2,3 @@ node_modules
 .env
 ecommerce2.pem
 notas.txt
-views
-transactionsControllerGetListMethod.js

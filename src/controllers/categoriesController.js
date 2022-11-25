@@ -8,6 +8,7 @@ const {
     createCategory,
     updateCategory,
     destroyCategory,
+    restoreCategory
 }=require("../repositories/categoriesRepository");
 
 const categoriesController={
@@ -148,47 +149,60 @@ const categoriesController={
                 message:'Category created',
                 category
             });
-        }catch(e){
-            console.log(e);
+        }catch(error){
+            
+            // Como está implementado el soft delete se hace necesario contemplar la posibilidad la categoría que quiere crearse ya se encuentre en la base de datos, en este caso corresponde cambiar a null el valor del atributo deletedAt para esa categoría 
+            if (error.name==='SequelizeUniqueConstraintError') {
+                await restoreCategory(body.name);
+                let restoredCategory=await findCategoryByName(body.name);
+                if (!body.description) {
+                    body.description="This category doesn't have a description";
+                };
+                restoredCategory=await updateCategory(restoredCategory,body);
+                return res.status(201).json({
+                status:201,
+                message:'Category restored',
+                restoredCategory
+                });
+            }else{
+               console.log(error);
             return res.status(500).json({
                 status:500,
                 message:'Server error'
-            })
-        }
+            }); 
+            };
+        };
     },
     updateCategory:async(req,res)=>{
         const {body}=req;
         const {id}=req.params;
         try{
+            let category=await findCategoryByPk(id);
+            // Se corroborra que exista el categoryo sobre el que se aplica la petición PUT
+            if (!category) return res.status(404).json({
+                status:404,
+                message:'There is no product whit that id'
+            }); 
             // En el caso que el valor de la descripción sea un string vacío, resulta necesario cambiar este valor a "undefinded" para que, por lo definido para este atributo en el modelo "Category", opere la propiedad "defaultValue
             if (!body.description) {
                 body.description="This category doesn't have a description";
             };
-            const category=await updateCategory(body,id);
-            // Se corroborra que exista la categoría sobre la que se aplica la petición PUT
-            if (!category) return res.status(404).json({
-                status:404,
-                message:'There is no category whit that id'
-            });
+            category=await updateCategory(category,body);
             return res.status(200).json({
                 status:200,
                 message:'Category updated',
                 category
             })
-        }catch(e){
-            console.log(e);
-            if (e.errors){
-                for (const error of e.errors){
-                    if (error.type==='unique violation') return res.status(400).json({
-                        status:400,
-                        errors:{
-                            name:{
-                                msg:'That category already exits',
-                            },
-                        },
-                    });
-                };
-            };
+        }catch(error){
+            if (error.name==='SequelizeUniqueConstraintError') return res.status(400).json({
+                status:400,
+                errors:{
+                    name:{
+                        msg:'That category already exits',
+                    },
+                },
+            })
+            console.log(error);
             return res.status(500).json({
                 status:500,
                 message:'Server error'
