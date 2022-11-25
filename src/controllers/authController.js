@@ -9,7 +9,8 @@ const {
     findUserByEmail,
     createUser,
     updateUser,
-    destroyUser
+    destroyUser,
+    restoreUser,
 }=require("../repositories/usersRepository");
 
 const bcryptjs=require("bcryptjs");
@@ -22,7 +23,7 @@ const authController={
         //Aquellos usuarios que tienen el rol como administrador, deben ser incluidos en la lista de usuarios administradores, pues para asignarle este rol, se consulta si el usuario forma parte de esta lista, en caso que así sea se cambia el valor de la propiedad "role_id" que viene del body por el número  el número 1 -se definió en la tabla roles que el id 1 es el que corresponde para el usuario administrador-. 
         const adminUsers=["ecommerce1287@gmail.com"];
         try {
-            let user=await findUserByEmail(body.email);
+            const user=await findUserByEmail(body.email);
             if (user) return res.status(400).json({
                 status:400,
                 errors:{
@@ -41,17 +42,24 @@ const authController={
             };
             body.password=bcryptjs.hashSync(body.password,10);
             if (adminUsers.includes(body.email)) body.role_id=1;
-            user=await createUser(body);
-            
-            await sendWelcomeEmail(user.email,user.first_name);
+            const newUser=await createUser(body);
+            await sendWelcomeEmail(newUser.email,newUser.first_name);
             return res.status(201).json({
                 status:201,
                 message:'User created',
-                user
+                newUser
             });
-            
         } catch(error) {
-            console.log(error)
+            console.log(error);
+            // Como está implementado el soft delete se hace necesario contemplar la posibilidad de que el usuario que se registra ya se encuentre en la base de datos, en este caso corresponde cambiar a null el valor del atributo deletedAt 
+            if (error.name==='SequelizeUniqueConstraintError') {
+                const restoredUser=await restoreUser(body.email)
+                return res.status(201).json({
+                status:201,
+                message:'User restored',
+                restoredUser
+                });
+            }
             return res.status(500).json({
                 status:500,
                 message:'Server error'

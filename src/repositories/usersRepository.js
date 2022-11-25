@@ -101,6 +101,13 @@ const usersRepository={
             }
         });
     },
+    restoreUser:async(email)=>{
+        return await User.restore({
+            where:{
+                email
+            }
+        })
+    },
 }
 
 module.exports=usersRepository
