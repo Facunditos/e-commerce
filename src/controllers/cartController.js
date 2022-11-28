@@ -97,7 +97,7 @@ const transactionsController={
             for (const product of productsOnCart) {
                 await transactionAddProduct(transaction,product)
             };
-            req.session.carts[userId]= {};
+            req.session.carts[userId]=undefined;
             transaction=await findTransactionByPk(transaction.id);
             transaction.worth=new Intl.NumberFormat(undefined,{
                 style:"currency",

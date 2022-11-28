@@ -312,6 +312,10 @@
  *                                  example: $ 2.560,40 
  *          400: 
  *              $ref: '#/components/responses/BadRequest'
+ *          401: 
+ *              $ref: '#/components/responses/Unauthorized'
+ *          403: 
+ *              $ref: '#/components/responses/Forbbiden'
  *          404: 
  *              $ref: '#/components/responses/NotFound'
  *          500: 
