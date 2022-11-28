@@ -104,7 +104,6 @@ const productsController={
         };
     },
     getProductDetail:async (req,res)=>{
-        console.log(req.params);
         const {id}=req.params;
         try {
             // Se corroborra que exista el producto sobra el que se aplica la petición GET

@@ -25,7 +25,6 @@ const meProductsController={
         };
         // El id del usuario vendedor puede venir: (a) en la propiedad "user" adosada a la request al momento de la verificación del token, para el caso del usuario vendedor; o (b) como query string, para el caso del usuario admin. 
         const sellerId=req.user.role_name==='Seller'?req.user.id:req.query.sellerId;
-        console.log("sellerId",sellerId);
         //El número de página al que se quiere acceder es indicado como query al final de la url.
         let {page}=req.query;
         //En caso que no haya sido indicado - req.page=undefenid -, se asigna por defecto la página 1. 
@@ -199,7 +198,6 @@ const meProductsController={
             if (error.name==='SequelizeUniqueConstraintError') {
                 await restoreProduct(body.name);   
                 let restoredProduct=await findProductByName(body.name);
-                console.log('restoresProduct',restoredProduct);
                 const oldimage=restoredProduct.image;
                 const oldimageArray=oldimage.split(".com/");
                 const oldKey=oldimageArray[1];

@@ -47,7 +47,6 @@ const productsRepository={
     },
     searchProductsByNameAndOrder:async(name,orderBy,order,offset,sellerId)=>{
         if (orderBy===undefined) orderBy='sales';
-        console.log('order',order);
         if (order===undefined) {
             if (orderBy==='sales') {
                 order='desc';

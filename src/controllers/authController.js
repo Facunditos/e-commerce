@@ -108,8 +108,6 @@ const authController={
                   expiresIn: "8h",
                 },
             );
-            req.session.email=user.email;
-            console.log("auth",req.session.email);
             return res.status(200).json({
                 status:200,
                 message:'User logged in',
