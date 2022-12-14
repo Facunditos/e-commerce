@@ -17,14 +17,14 @@ const path=require("path");
 const meProductsController={
     getProductsList:async(req,res)=>{
         //Si el usuario que realiza la petición es Admin y no incluye el id del usuario vendedor se retorna un error
-        if (req.user.role_name==='Admin'&&!req.query.sellerId){
+        if (req.user.Role.name==='Admin'&&!req.query.sellerId){
             return res.status(400).json({
                 status:400,
                 message:'Admin, you have to include a seller id as query'
             });
         };
         // El id del usuario vendedor puede venir: (a) en la propiedad "user" adosada a la request al momento de la verificación del token, para el caso del usuario vendedor; o (b) como query string, para el caso del usuario admin. 
-        const sellerId=req.user.role_name==='Seller'?req.user.id:req.query.sellerId;
+        const sellerId=req.user.Role.name==='Seller'?req.user.id:req.query.sellerId;
         //El número de página al que se quiere acceder es indicado como query al final de la url.
         let {page}=req.query;
         //En caso que no haya sido indicado - req.page=undefenid -, se asigna por defecto la página 1. 
@@ -70,14 +70,14 @@ const meProductsController={
     searchProductsByName:async(req,res)=>{
         // Para la búsqueda se hace uso del operador "like", que permite especificar la condición que debiera cumplirse para que se arroje un resultado, se hace uso del comodín "%" para evitar búsquedas restrictivas. La condición de búsqueda es especificada como query de la petición. En el resultado de la búsqueda se proporionan los id de los productos encontrados. Con los respectivos id, pueden realizarse las correspondientes peticiones para conocer el detalle de un producto.
         //Si el usuario que realiza la petición es Admin y no incluye el id del usuario vendedor se retorna un error.
-        if (req.user.role_name==='Admin'&&!req.query.sellerId){
+        if (req.user.Role.name==='Admin'&&!req.query.sellerId){
             return res.status(400).json({
                 status:400,
                 message:'Admin, you have to include a seller id as query'
             });
         };
         // El id del usuario vendedor puede venir: (a) en la propiedad "user" adosada a la request al momento de la verificación del token, para el caso del usuario vendedor; o (b) como query string, para el caso del usuario admin. 
-        const sellerId=req.user.role_name==='Seller'?req.user.id:req.query.sellerId;
+        const sellerId=req.user.Role.name==='Seller'?req.user.id:req.query.sellerId;
         let {name,orderBy,order,page}=req.query;
         if (!page) page=1;
         page=parseInt(page);
@@ -138,7 +138,7 @@ const meProductsController={
                 status:404,
                 message:'There is no product whit that id'
             });
-            if (userInToken.role_name=="Seller"&&userInToken.id!==product.seller_user_id) return res.status(403).json({
+            if (userInToken.Role.name=="Seller"&&userInToken.id!==product.seller_user_id) return res.status(403).json({
                 status:403,
                 message:`${userInToken.first_name}, you don't have permission to do it`,
             });

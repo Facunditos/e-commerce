@@ -31,7 +31,7 @@ const transactionsController={
             //La clave count almacena la cantidad de transacciones encontradas para la query especificada, sin tener en cuenta si se indicó limitar la cantidad de registros devueltos. La clase rows almacena el array de transacciones que se quieren mostrar. 
             let count;
             let rows;
-            if (user.role_name==="Admin") {
+            if (user.Role.name==="Admin") {
                 const results=await getAllTransactions(offset);
                 count=results.count;
                 rows=results.rows;
@@ -77,7 +77,7 @@ const transactionsController={
                 status:404,
                 message:'There is no transaction whit that id'
             });
-            if (userInToken.role_name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
+            if (userInToken.Role.name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
                 status:403,
                 message:`${userInToken.first_name}, you don't have permission to do it`,
             });
@@ -105,7 +105,7 @@ const transactionsController={
                 message:'There is no transaction whit this id'
             });
             //El usuario que es Admin tiene habilitada la opción de eliminar la transacción. El usuario Buyer la puede eliminar si es efectivamente quien actuó como comprador en esta transacción, de esta manera se imposibilitada que un usuario que no es Admin pueda eliminar una transacción de la que no participa como comprador. 
-            if (userInToken.role_name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
+            if (userInToken.Role.name=="Buyer"&&userInToken.id!==transaction.buyer_user_id) return res.status(403).json({
                 status:403,
                 message:`${userInToken.first_name}, you don't have permission to do it`,
             });

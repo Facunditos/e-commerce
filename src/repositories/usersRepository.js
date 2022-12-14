@@ -14,7 +14,9 @@ const usersRepository={
     },
     findUserByPk:async(id)=>{
         const user=await User.findByPk(id,{
-            attributes:['id','first_name','last_name','email','image'],
+            attributes:{
+                exclude:['password','role_id','createdAt','updatedAt','deletedAt',]
+            },
             include:[
                 {
                     association:'Buys',

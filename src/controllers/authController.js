@@ -100,7 +100,7 @@ const authController={
                     },
                 },
             });
-            const payload=user;
+            const payload=user.id;
             const token=jwt.sign(
                 {payload},
                 process.env.JWT_PRIVATE_KEY,
