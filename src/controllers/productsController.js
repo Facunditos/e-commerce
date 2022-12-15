@@ -62,6 +62,8 @@ const productsController={
             status:400,
             message:"That page does't exist",
         });
+        if (orderBy==='undefined') orderBy=undefined;
+        if (order==='undefined') order=undefined;
         const attributes=['sales','price'];
         const orderList=['asc','desc','ASC','DESC']
         if (orderBy&&!attributes.includes(orderBy)) return res.status(400).json({
@@ -89,8 +91,8 @@ const productsController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/api/v1/products/search?name=${name}&page=${previousPage}`,
-                nextpage:`/api/v1/products/search?name=${name}&page=${nextPage}`,
+                previouspage:`/api/v1/products/search?name=${name}&page=${previousPage}&order=${order}&orderBy=${orderBy}`,
+                nextpage:`/api/v1/products/search?name=${name}&page=${nextPage}&order=${order}&orderBy=${orderBy}`,
                 count,
                 products:rows,
             });

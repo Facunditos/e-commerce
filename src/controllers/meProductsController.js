@@ -53,8 +53,8 @@ const meProductsController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/api/v1/me/products?page=${previousPage}`,
-                nextpage:`/api/v1/me/products?page=${nextPage}`,
+                previouspage:`/api/v1/me/products?sellerId=${sellerId}&page=${previousPage}`,
+                nextpage:`/api/v1/me/products?sellerId=${sellerId}&page=${nextPage}`,
                 count,
                 products:rows,
             });
@@ -86,7 +86,9 @@ const meProductsController={
             message:"That page does't exist",
         });
         const attributes=['name','price'];
-        const orderList=['asc','desc','ASC','DESC']
+        const orderList=['asc','desc','ASC','DESC'];
+        if (orderBy==='undefined') orderBy=undefined;
+        if (order==='undefined') order=undefined;
         if (orderBy&&!attributes.includes(orderBy)) {
             return res.status(400).json({
             status:400,
@@ -114,8 +116,8 @@ const meProductsController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/api/v1/me/products/search?name=${name}&page=${previousPage}`,
-                nextpage:`/api/v1/me/products/search?name=${name}&page=${nextPage}`,
+                previouspage:`/api/v1/me/products/search?sellerId=${sellerId}&name=${name}&page=${previousPage}&order=${order}&orderBy=${orderBy}`,
+                nextpage:`/api/v1/me/products/search?sellerId=${sellerId}&name=${name}&page=${nextPage}&order=${order}&orderBy=${orderBy}`,
                 count,
                 products:rows,
             });
