@@ -90,8 +90,8 @@ const categoriesController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/api/v1/categories?page=${previousPage}`,
-                nextpage:`/api/v1/categories?page=${nextPage}`,
+                previouspage:`/api/v1/categories/search?name=${name}&page=${previousPage}`,
+                nextpage:`/api/v1/categories/search?name=${name}&page=${nextPage}`,
                 count,
                 categories:rows,
             });

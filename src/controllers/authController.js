@@ -79,9 +79,9 @@ const authController={
         };
     },
     loginUser:async(req,res)=>{
-        try {
-            let {email,password}=req.body;
-            let user=await findUserByEmail(email);
+        const {email,password}=req.body;
+        try {    
+            const user=await findUserByEmail(email);
             if (!user) return res.status(404).json({
                 status:404,
                 errors:{
@@ -91,7 +91,7 @@ const authController={
                 },
             });
             const hashPassword=user.password;
-            let isRightPassword=bcryptjs.compareSync(password,hashPassword);
+            const isRightPassword=bcryptjs.compareSync(password,hashPassword);
             if (!isRightPassword) return res.status(404).json({
                 status:404,
                 errors:{

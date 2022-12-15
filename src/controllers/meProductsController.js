@@ -53,8 +53,8 @@ const meProductsController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/products?page=${previousPage}`,
-                nextpage:`/products?page=${nextPage}`,
+                previouspage:`/api/v1/me/products?page=${previousPage}`,
+                nextpage:`/api/v1/me/products?page=${nextPage}`,
                 count,
                 products:rows,
             });
@@ -114,8 +114,8 @@ const meProductsController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/me/products?page=${previousPage}`,
-                nextpage:`/me/products?page=${nextPage}`,
+                previouspage:`/api/v1/me/products/search?name=${name}&page=${previousPage}`,
+                nextpage:`/api/v1/me/products/search?name=${name}&page=${nextPage}`,
                 count,
                 products:rows,
             });
@@ -171,7 +171,7 @@ const meProductsController={
                 },
             });
             const productCategory=await findCategoryByPk(body.category_id);
-            if (productCategory==null) return res.status(400).json({
+            if (productCategory===null) return res.status(400).json({
                 status:400,
                 errors:{
                     category_id:{

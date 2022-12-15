@@ -35,8 +35,8 @@ const productsController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/products?page=${previousPage}`,
-                nextpage:`/products?page=${nextPage}`,
+                previouspage:`/api/v1/products?page=${previousPage}`,
+                nextpage:`/api/v1/products?page=${nextPage}`,
                 count,
                 products:rows,
             });
@@ -89,8 +89,8 @@ const productsController={
             const nextPage=page==maxPage?page:page+1;
             return res.status(200).json({
                 status:200,
-                previouspage:`/products?page=${previousPage}`,
-                nextpage:`/products?page=${nextPage}`,
+                previouspage:`/api/v1/products/search?name=${name}&page=${previousPage}`,
+                nextpage:`/api/v1/products/search?name=${name}&page=${nextPage}`,
                 count,
                 products:rows,
             });
