@@ -152,7 +152,7 @@ const swaggerSpec={
         },
         servers:[
             {
-                url:'http://54.232.59.15:3030/'
+                url:'http://demo-e-commerce.com.ar:3030/'
             },
             {
                 url:'http://localhost:3030/'
