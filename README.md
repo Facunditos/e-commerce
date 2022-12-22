@@ -1,6 +1,6 @@
 ## Ecommerce Service
 ### App developed in Nodejs with express and mysql.
-### App live on: http://ec2-52-67-178-145.sa-east-1.compute.amazonaws.com:3030/
+### App live on: http://demo-e-commerce.com.ar:3030/
 ## Get started:
 - Run *npm install* to install the dependencies
 - Set the environment variables in the .env file
